@@ -13,7 +13,7 @@ public class HeroController : MonoBehaviour
      * left arrow  = move left
      * right arrow = move right
      * spacebar    = draw sword / attack
-     * X           = stow sword
+     * X           = stow sword / draw sword
      */
     
     // Start is called before the first frame update
@@ -78,7 +78,7 @@ public class HeroController : MonoBehaviour
             lastMoveDir = "left";
         }
 
-        // Set ATTACKING animator params based on input
+        // Set WEAPON USE animator params based on input
         if (Input.GetKey(KeyCode.Space))
         {
             if (!heroAnimator.GetBool("swordEquipped"))
@@ -87,14 +87,17 @@ public class HeroController : MonoBehaviour
             }
             heroAnimator.SetBool("startAttack", true);
         }
+        else if (Input.GetKeyDown(KeyCode.X))
+        {
+            if (!heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Swapping"))
+            {
+                // Stow Sword or Draw Sword
+                heroAnimator.SetBool("swordEquipped", !heroAnimator.GetBool("swordEquipped"));
+            }
+        }
         else 
         {
             heroAnimator.SetBool("startAttack", false);
-        }
-        if (Input.GetKey(KeyCode.X))
-        {
-            // X: Stow Sword
-            heroAnimator.SetBool("swordEquipped", false);
         }
 
         // Move hero based on animator params
