@@ -1,7 +1,13 @@
 fileFormatVersion: 2
 guid: bdbed7d5a7aa041998c6014704e025a3
 TextureImporter:
-  fileIDToRecycleName: {}
+  fileIDToRecycleName:
+    21300000: adventurer-run3-sword-Sheet_0
+    21300002: adventurer-run3-sword-Sheet_1
+    21300004: adventurer-run3-sword-Sheet_2
+    21300006: adventurer-run3-sword-Sheet_3
+    21300008: adventurer-run3-sword-Sheet_4
+    21300010: adventurer-run3-sword-Sheet_5
   externalObjects: {}
   serializedVersion: 9
   mipmaps:
@@ -40,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -69,9 +75,151 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
+  - serializedVersion: 2
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+  - serializedVersion: 2
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: adventurer-run3-sword-Sheet_0
+      rect:
+        serializedVersion: 2
+        x: 12
+        y: 1
+        width: 24
+        height: 28
+      alignment: 9
+      pivot: {x: 0.7231574, y: 0.43624082}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9f66e824c8626d7469c5ae266936b60a
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: adventurer-run3-sword-Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 63
+        y: 1
+        width: 23
+        height: 27
+      alignment: 9
+      pivot: {x: 0.68850577, y: 0.3866502}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ad1268e57ed8f294099e0e972fd83483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: adventurer-run3-sword-Sheet_2
+      rect:
+        serializedVersion: 2
+        x: 113
+        y: 1
+        width: 23
+        height: 25
+      alignment: 9
+      pivot: {x: 0.7328604, y: 0.40818673}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 92dcd92102f43bd4da973b11817b77f5
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: adventurer-run3-sword-Sheet_3
+      rect:
+        serializedVersion: 2
+        x: 163
+        y: 1
+        width: 27
+        height: 28
+      alignment: 9
+      pivot: {x: 0.5755666, y: 0.43624082}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 44c295b8ecec7284c94819bfbeac7b43
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: adventurer-run3-sword-Sheet_4
+      rect:
+        serializedVersion: 2
+        x: 213
+        y: 1
+        width: 23
+        height: 27
+      alignment: 9
+      pivot: {x: 0.66632944, y: 0.39609602}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0d335bad44c403d468c42a7d77d6c870
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: adventurer-run3-sword-Sheet_5
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 1
+        width: 22
+        height: 25
+      alignment: 9
+      pivot: {x: 0.66229665, y: 0.4285897}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 515ad5edbd824924ab68e506872a4c6d
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []

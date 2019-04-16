@@ -11,13 +11,13 @@ TextureImporter:
     21300012: adventurer-bow-Sheet_6
     21300014: adventurer-bow-Sheet_7
     21300016: adventurer-bow-Sheet_8
-    21300018: adventurer-bow-Sheet_9
-    21300020: adventurer-bow-Sheet_10
-    21300022: adventurer-bow-Sheet_11
-    21300024: adventurer-bow-Sheet_12
-    21300026: adventurer-bow-Sheet_13
-    21300028: adventurer-bow-Sheet_14
-    21300030: adventurer-bow-Sheet_16
+    21300018: adventurer-bow-Sheet_8
+    21300020: adventurer-bow-Sheet_9
+    21300022: adventurer-bow-Sheet_10
+    21300024: adventurer-bow-Sheet_11
+    21300026: adventurer-bow-Sheet_12
+    21300028: adventurer-bow-Sheet_13
+    21300030: adventurer-bow-Sheet_14
   externalObjects: {}
   serializedVersion: 9
   mipmaps:
@@ -118,8 +118,8 @@ TextureImporter:
         y: 112
         width: 22
         height: 26
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.47634584, y: 0.39325303}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -138,8 +138,8 @@ TextureImporter:
         y: 112
         width: 22
         height: 25
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.50000036, y: 0.33347443}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -158,8 +158,8 @@ TextureImporter:
         y: 112
         width: 24
         height: 24
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.38435778, y: 0.35544714}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -178,8 +178,8 @@ TextureImporter:
         y: 112
         width: 30
         height: 25
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.34966582, y: 0.38898376}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -198,8 +198,8 @@ TextureImporter:
         y: 75
         width: 25
         height: 26
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.38898268, y: 0.3598944}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -218,8 +218,8 @@ TextureImporter:
         y: 75
         width: 23
         height: 25
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.4019553, y: 0.36816743}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -238,8 +238,8 @@ TextureImporter:
         y: 75
         width: 25
         height: 26
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.4097986, y: 0.35322306}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -256,10 +256,10 @@ TextureImporter:
         serializedVersion: 2
         x: 161
         y: 75
-        width: 28
+        width: 37
         height: 26
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.40707344, y: 0.3665663}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -274,32 +274,12 @@ TextureImporter:
       name: adventurer-bow-Sheet_8
       rect:
         serializedVersion: 2
-        x: 190
-        y: 86
-        width: 7
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: c88d8cba43dd0b445ab90325a030d385
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: adventurer-bow-Sheet_9
-      rect:
-        serializedVersion: 2
         x: 15
         y: 38
         width: 29
         height: 26
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.32055396, y: 0.37323776}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -311,15 +291,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: adventurer-bow-Sheet_10
+      name: adventurer-bow-Sheet_9
       rect:
         serializedVersion: 2
         x: 68
         y: 40
         width: 23
         height: 25
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.29636782, y: 0.3681671}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -331,15 +311,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: adventurer-bow-Sheet_11
+      name: adventurer-bow-Sheet_10
       rect:
         serializedVersion: 2
         x: 114
         y: 43
         width: 30
         height: 23
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.38435718, y: 0.2888258}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -351,15 +331,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: adventurer-bow-Sheet_12
+      name: adventurer-bow-Sheet_11
       rect:
         serializedVersion: 2
         x: 163
         y: 43
         width: 26
         height: 24
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.47998518, y: 0.31208023}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -371,15 +351,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: adventurer-bow-Sheet_13
+      name: adventurer-bow-Sheet_12
       rect:
         serializedVersion: 2
         x: 11
         y: 4
         width: 27
         height: 25
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.5385478, y: 0.35429013}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -391,15 +371,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: adventurer-bow-Sheet_14
+      name: adventurer-bow-Sheet_13
       rect:
         serializedVersion: 2
         x: 61
         y: 4
         width: 36
         height: 26
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.33135393, y: 0.3799092}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -411,15 +391,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: adventurer-bow-Sheet_16
+      name: adventurer-bow-Sheet_14
       rect:
         serializedVersion: 2
         x: 110
         y: 4
         width: 34
         height: 26
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.43877748, y: 0.39325264}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []

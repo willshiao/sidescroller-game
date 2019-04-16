@@ -1,0 +1,91 @@
+------------------------------------------------------------------------
+
+Animations of Dumpling Hero spritesheets
+
+adventurer-v1.5-Sheet
+adventurer-run3-sword-Sheet
+adventurer-hand-combat-Sheet
+adventurer-bow-Sheet
+
+------------------------------------------------------------------------
+
+adventurer-v1.5-Sheet
+
+Indices    Length         Animation
+ 0-3         4        Unarmed_StandIdle
+ 4-7         4        Unarmed_KneelIdle
+ 8-13        6        Unarmed_Jog
+ 14-15       2        Unarmed_Jump
+ 16-23       8        Unarmed_JumpSecond
+ 14-23      10        Unarmed_JumpFlip
+ 24-28       5        Unarmed_Slide
+ 29-37       9        Unarmed_SpellCast       (Questionable)
+ 38-41       4        Sword_StandIdle
+ 42-52      11        Sword_AttackTwoSwing
+ 53-58       6        Sword_AttackSpin
+ 59-64       5        Sword_Block             (Questionable)
+ 64-68       5        Sword_Kneel
+ 66-68       3        Sword_KneelIdle
+ 69-72       4        Unarmed_DrawSword
+ 73-76       4        Sword_StowSword
+ 77-78       2        Unarmed_Midair
+ 79-80       2        Unarmed_WallGrab
+ 81-84       4        Unarmed_Climbing
+ 85-93       9        Unarmed_UltimateCharge
+ 94-95       2        Unarmed_DrawSwordForUltimate
+ 96-108     15        Sword_UltimateAttack
+ 85-108     24        Comp-Full-Ultimate
+ 
+---------------------------------------------------------------------------
+ 
+adventurer-run3-sword-Sheet
+
+Indices    Length         Animation
+ 0-5         6        Sword_Run
+
+--------------------------------------------------------------------------- 
+ 
+adventurer-hand-combat-Sheet
+
+Indices    Length         Animation
+ 0-4         5        Unarmed_PunchOne
+ 4-8         5        Unarmed_PunchTwo
+ 9-13        5        Unarmed_PunchUppercut
+ 14-19       6        Unarmed_PunchLunge
+ 20-23       4        Unarmed_KickOne
+ 24-27       4        Unarmed_KickSpin
+ 28-31       4        Unarmed_KickMidair
+ 32-39       8        Unarmed_KnockedDown
+ 38-39       2        Unarmed_DeadIdle
+ 40-45       6        Unarmed_GetUp
+ 46-51       6        Unarmed_Walk
+ 52-57       6        Unarmed_CrouchWalk
+ 58-63       6        Unarmed_Sprint
+ 64-69       6        Unarmed_RunUpWall
+
+--------------------------------------------------------------------------- 
+ 
+adventurer-bow-Sheet
+
+Indices    Length         Animation
+ 0-1         2        Unarmed_DrawBow
+ 2-8         7        Bow_StandShoot
+ 9-14        6        Bow_MidairShoot
+ 
+---------------------------------------------------------------------------
+ 
+NOTES:
+
+In Sprite Editor, change Pivot Point of every Sprite so that the animations
+are shown relative to a point on the hero's body, instead of a point of the 
+Sprite frame. 
+
+Pivot Point Used In Spritesheets:    Waist,Belt Area
+
+When hero is crouching, Pivot Point is slightly above the waist on the hero's body.
+When hero is jumping or extended, Pivot Point is slightly below the waist on the hero's body.
+
+Do not change the names of the Sprites (or animations will get holocaustic)
+ 
+ 
+ 
