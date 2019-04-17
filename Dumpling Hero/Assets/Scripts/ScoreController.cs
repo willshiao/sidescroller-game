@@ -20,6 +20,12 @@ public class ScoreController : MonoBehaviour
         score.text = "Score: " + scoreValue;
     }
 
+    // increase score function
+    public void UpdateScore(int points)
+    {
+        scoreValue += points;
+    }
+
     // When "Reset Scene" button is pressed
     public void ResetScene()
     {

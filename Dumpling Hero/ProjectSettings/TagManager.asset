@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Animation
   - GameDataObject
+  - Enemy
   layers:
   - Default
   - TransparentFX

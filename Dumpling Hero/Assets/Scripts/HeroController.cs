@@ -12,7 +12,7 @@ public class HeroController : MonoBehaviour
     private const float HERO_BASE_SPEED = 1.6F;
     private const float HERO_ATTACKING_SPEED_PENALTY = 0.25F; // try 4.0F if you wanna be a jedi
     private const float HERO_SWAPPING_SPEED = 0.1F;
-    private const float HERO_FREERUN_SPEED_BOOST = 1.3F;
+    private const float HERO_FREERUN_SPEED_BOOST = 1.4F;
 
     /* 
      * DUMPLING HERO CONTROLS 
@@ -47,12 +47,12 @@ public class HeroController : MonoBehaviour
             if (lastMoveDir == "right")
             {
                 speed = -HERO_BASE_SPEED;
-                yAngle = 180.0F;
+                yAngle = 180;
             }
             else if (lastMoveDir == "left")
             {
                 speed = HERO_BASE_SPEED;
-                yAngle = 0.0F;
+                yAngle = 0;
             }
             if (!heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Swapping"))
             {
@@ -67,7 +67,7 @@ public class HeroController : MonoBehaviour
         {
             if (!heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Swapping"))
             {
-                gameObject.transform.SetPositionAndRotation(transform.position, new Quaternion(transform.rotation.x, 0.0F, transform.rotation.z, transform.rotation.w));
+                gameObject.transform.SetPositionAndRotation(transform.position, new Quaternion(transform.rotation.x, 0, transform.rotation.z, transform.rotation.w));
             }
             heroAnimator.SetBool("moving", true);
             speed = HERO_BASE_SPEED;
@@ -77,7 +77,7 @@ public class HeroController : MonoBehaviour
         {
             if (!heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Swapping"))
             {
-                gameObject.transform.SetPositionAndRotation(transform.position, new Quaternion(transform.rotation.x, 180.0F, transform.rotation.z, transform.rotation.w));
+                gameObject.transform.SetPositionAndRotation(transform.position, new Quaternion(transform.rotation.x, 180, transform.rotation.z, transform.rotation.w));
             }
             heroAnimator.SetBool("moving", true);
             speed = -HERO_BASE_SPEED;
