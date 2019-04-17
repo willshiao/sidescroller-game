@@ -8,6 +8,12 @@ public class HeroController : MonoBehaviour
 
     private string lastMoveDir;
 
+    /* Teakable parameters */
+    private const float HERO_BASE_SPEED = 1.6F;
+    private const float HERO_ATTACKING_SPEED_PENALTY = 0.25F; // try 4.0F if you wanna be a jedi
+    private const float HERO_SWAPPING_SPEED = 0.1F;
+    private const float HERO_FREERUN_SPEED_BOOST = 1.3F;
+
     /* 
      * DUMPLING HERO CONTROLS 
      * left arrow  = move left
@@ -15,7 +21,7 @@ public class HeroController : MonoBehaviour
      * spacebar    = draw sword / attack
      * X           = stow sword / draw sword
      */
-    
+
     // Start is called before the first frame update
     void Start()
     {
@@ -40,12 +46,12 @@ public class HeroController : MonoBehaviour
             var yAngle = 0.0F;
             if (lastMoveDir == "right")
             {
-                speed = -3.0F;
+                speed = -HERO_BASE_SPEED;
                 yAngle = 180.0F;
             }
             else if (lastMoveDir == "left")
             {
-                speed = 3.0F;
+                speed = HERO_BASE_SPEED;
                 yAngle = 0.0F;
             }
             if (!heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Swapping"))
@@ -64,7 +70,7 @@ public class HeroController : MonoBehaviour
                 gameObject.transform.SetPositionAndRotation(transform.position, new Quaternion(transform.rotation.x, 0.0F, transform.rotation.z, transform.rotation.w));
             }
             heroAnimator.SetBool("moving", true);
-            speed = 3.0F;
+            speed = HERO_BASE_SPEED;
             lastMoveDir = "right";
         }
         else if (Input.GetKey("left"))
@@ -74,7 +80,7 @@ public class HeroController : MonoBehaviour
                 gameObject.transform.SetPositionAndRotation(transform.position, new Quaternion(transform.rotation.x, 180.0F, transform.rotation.z, transform.rotation.w));
             }
             heroAnimator.SetBool("moving", true);
-            speed = -3.0F;
+            speed = -HERO_BASE_SPEED;
             lastMoveDir = "left";
         }
 
@@ -103,15 +109,15 @@ public class HeroController : MonoBehaviour
         // Move hero based on animator params
         if (heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Attack"))
         {
-            speed = speed / 4.0F; // decrease speed if attacking
+            speed = speed * HERO_ATTACKING_SPEED_PENALTY; // decrease speed if attacking
         } 
         else if (heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Swapping"))
         {
-            speed = 0.1F; // super decrease speed when drawing weapons ??
+            speed = HERO_SWAPPING_SPEED; // super decrease speed when drawing weapons ??
         }
         else if (!heroAnimator.GetBool("swordEquipped"))
         {
-            speed = speed * 1.3F; // increase speed if you do not have your sword out
+            speed = speed * HERO_FREERUN_SPEED_BOOST; // increase speed if you do not have your sword out
         }
         if (heroAnimator.GetBool("moving"))
         {

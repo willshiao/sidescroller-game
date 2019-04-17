@@ -18,8 +18,12 @@ public class ScoreController : MonoBehaviour
     void Update()
     {
         score.text = "Score: " + scoreValue;
+    }
 
-
-
+    // When "Reset Scene" button is pressed
+    public void ResetScene()
+    {
+        scoreValue = 0;
     }
 }
+

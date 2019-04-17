@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class DebugTextController : MonoBehaviour
 {
     public string playerModsText;
+
     Text debugText;
 
     // Start is called before the first frame update
