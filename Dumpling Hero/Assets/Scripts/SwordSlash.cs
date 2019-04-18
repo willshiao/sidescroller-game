@@ -25,11 +25,11 @@ public class SwordSlash : MonoBehaviour
     {
         string currentSprite = heroSR.sprite.name;
 
-        if (currentSprite == "adventurer_50")
+        if (currentSprite == "adventurer_44")
         {
             swordSlashes[0].enabled = true;
         }
-        else if (currentSprite == "adventurer_44")
+        else if (currentSprite == "adventurer_50")
         {
             swordSlashes[1].enabled = true;
         }
@@ -50,6 +50,7 @@ public class SwordSlash : MonoBehaviour
         }
     }
 
+    // This is called when swords hit something
     public void OnCollisionEnter2D(Collision2D col)
     {
         if (col.gameObject.tag == "Enemy")
