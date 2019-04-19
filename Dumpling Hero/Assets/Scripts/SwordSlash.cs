@@ -4,11 +4,19 @@ using UnityEngine;
 
 public class SwordSlash : MonoBehaviour
 {
-    public ScoreController sc;
+
     public SpriteRenderer heroSR;
 
     public PolygonCollider2D[] swordSlashes;
     public int numSwordSlashes;
+
+    // Enemies
+    public BatController bc;
+
+    // Sword damage Teakables
+    const int SWORD_BASE_ATTACK_DMG_MIN =  4;
+    const int SWORD_BASE_ATTACK_DMG_MAX = 10;
+
 
     // Start is called before the first frame update
     void Start()
@@ -53,10 +61,17 @@ public class SwordSlash : MonoBehaviour
     // This is called when swords hit something
     public void OnCollisionEnter2D(Collision2D col)
     {
-        if (col.gameObject.tag == "Enemy")
+        var dmg = Random.Range(SWORD_BASE_ATTACK_DMG_MIN, SWORD_BASE_ATTACK_DMG_MAX);
+
+        if (col.gameObject.name == "Bat")
         {
-            sc.UpdateScore(10); //update score +10
-            Destroy(col.gameObject);
+            col.gameObject.GetComponent<BatController>().TakeHit(dmg);
         }
+        // or just have a script called TakeHit() for each enemy
+
+        //if (col.gameObject.name == "???")
+        //{
+
+        //}
     }
 }
