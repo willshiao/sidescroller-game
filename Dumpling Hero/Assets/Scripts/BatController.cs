@@ -179,6 +179,17 @@ public class BatController : MonoBehaviour
         }
     }
 
+    /*
+    // When the bat hits something...
+    public void OnCollisionEnter2D(Collision2D col)
+    {
+        if (col.gameObject.name == "SwordSlashes")
+        {
+            TakeHit(col.gameObject.GetComponent<SwordSlash>().GetSwordDamage());
+        }
+    }
+    */
+
     public char IsLeftOrRightOfMe(Transform target)
     {
         return (transform.position.x > target.position.x) ? 'L' : 'R';

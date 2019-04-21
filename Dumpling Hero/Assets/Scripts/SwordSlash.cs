@@ -4,14 +4,12 @@ using UnityEngine;
 
 public class SwordSlash : MonoBehaviour
 {
-
     public SpriteRenderer heroSR;
+
+    public GameObject hero;
 
     public PolygonCollider2D[] swordSlashes;
     public int numSwordSlashes;
-
-    // Enemies
-    public BatController bc;
 
     // Sword damage Teakables
     const int SWORD_BASE_ATTACK_DMG_MIN =  4;
@@ -31,22 +29,26 @@ public class SwordSlash : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Turn on the correct collider based on current sprite
         string currentSprite = heroSR.sprite.name;
-
         if (currentSprite == "adventurer_44")
         {
+            transform.position = hero.transform.position;
             swordSlashes[0].enabled = true;
         }
         else if (currentSprite == "adventurer_50")
         {
+            transform.position = hero.transform.position;
             swordSlashes[1].enabled = true;
         }
         else if (currentSprite == "adventurer_55")
         {
+            transform.position = hero.transform.position;
             swordSlashes[2].enabled = true;
         }
         else if (currentSprite == "adventurer_56")
         {
+            transform.position = hero.transform.position;
             swordSlashes[3].enabled = true;
         }
         else
@@ -58,20 +60,18 @@ public class SwordSlash : MonoBehaviour
         }
     }
 
-    // This is called when swords hit something
+    // When the sword hits something...
     public void OnCollisionEnter2D(Collision2D col)
     {
-        var dmg = Random.Range(SWORD_BASE_ATTACK_DMG_MIN, SWORD_BASE_ATTACK_DMG_MAX);
-
         if (col.gameObject.name == "Bat")
         {
-            col.gameObject.GetComponent<BatController>().TakeHit(dmg);
+            col.gameObject.GetComponent<BatController>().TakeHit(GetSwordDamage());
         }
-        // or just have a script called TakeHit() for each enemy
-
-        //if (col.gameObject.name == "???")
-        //{
-
-        //}
     }
+
+    public int GetSwordDamage()
+    {
+        return (int)Random.Range(SWORD_BASE_ATTACK_DMG_MIN, SWORD_BASE_ATTACK_DMG_MAX);
+    }
+
 }

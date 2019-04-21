@@ -30,7 +30,7 @@ public class GameDataManager : MonoBehaviour
 
     public void ResetScene()
     {
-        print("Loading Scene: " + currentLevelScenePath);
+        //print("Loading Scene: " + currentLevelScenePath);
         SceneManager.LoadScene(currentLevelScenePath, LoadSceneMode.Single);
     }
 }

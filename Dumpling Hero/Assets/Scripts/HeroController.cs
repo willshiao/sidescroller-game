@@ -6,13 +6,22 @@ public class HeroController : MonoBehaviour
 {
     public Animator heroAnimator;
 
+    public BoxCollider2D heroBodyCollider;
+
     private string lastMoveDir;
+
+    public LayerMask groundLayer;
+
+    float distToGround;
 
     /* Teakable parameters */
     private const float HERO_BASE_SPEED = 1.6F;
     private const float HERO_ATTACKING_SPEED_PENALTY = 0.25F; // try 4.0F if you wanna be a jedi
     private const float HERO_SWAPPING_SPEED = 0.1F;
     private const float HERO_FREERUN_SPEED_BOOST = 1.4F;
+    private const float HERO_JUMP_FORCE = 3.2F;
+
+    private const float HERO_GROUND_DETECT_RAY_LENGTH = 0.08F;
 
     /* 
      * DUMPLING HERO CONTROLS 
@@ -32,6 +41,9 @@ public class HeroController : MonoBehaviour
         // Init animator params
         heroAnimator.SetBool("moving", false);
         heroAnimator.SetBool("startAttack", false);
+
+        // Set Y extent of collider, use to check if hero is on ground
+        distToGround = heroBodyCollider.bounds.extents.y + HERO_GROUND_DETECT_RAY_LENGTH;
     }
 
     // Update is called once per frame
@@ -39,24 +51,32 @@ public class HeroController : MonoBehaviour
     {
         float speed = 0;
 
+        // Apply Jump Force if pressed & grounded
+        Debug.DrawRay(transform.position, Vector2.down * distToGround, Color.green);
+        if (Input.GetKeyDown(KeyCode.UpArrow) && IsGrounded())
+        {
+            gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.up * HERO_JUMP_FORCE, ForceMode2D.Impulse);
+        }
+
         // Set MOVEMENT animator params based on input
         if (Input.GetKey("right") && Input.GetKey("left"))
         {
             heroAnimator.SetBool("moving", true);
-            var yAngle = 0.0F;
+            bool flipX = false;
             if (lastMoveDir == "right")
             {
                 speed = -HERO_BASE_SPEED;
-                yAngle = 180;
+                flipX = true;
             }
             else if (lastMoveDir == "left")
             {
                 speed = HERO_BASE_SPEED;
-                yAngle = 0;
             }
             if (!heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Swapping"))
-            {
-                gameObject.transform.SetPositionAndRotation(transform.position, new Quaternion(transform.rotation.x, yAngle, transform.rotation.z, transform.rotation.w));
+            {   
+                gameObject.transform.SetPositionAndRotation(transform.position, new Quaternion(transform.rotation.x, ((flipX) ? 180 : 0), transform.rotation.z, transform.rotation.w));
+                //gameObject.GetComponent<SpriteRenderer>().flipX = flipX;
+
             }
         }
         else if (!Input.GetKey("right") && !Input.GetKey("left"))
@@ -68,6 +88,7 @@ public class HeroController : MonoBehaviour
             if (!heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Swapping"))
             {
                 gameObject.transform.SetPositionAndRotation(transform.position, new Quaternion(transform.rotation.x, 0, transform.rotation.z, transform.rotation.w));
+                //gameObject.GetComponent<SpriteRenderer>().flipX = false;
             }
             heroAnimator.SetBool("moving", true);
             speed = HERO_BASE_SPEED;
@@ -78,6 +99,7 @@ public class HeroController : MonoBehaviour
             if (!heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Swapping"))
             {
                 gameObject.transform.SetPositionAndRotation(transform.position, new Quaternion(transform.rotation.x, 180, transform.rotation.z, transform.rotation.w));
+                //gameObject.GetComponent<SpriteRenderer>().flipX = true;
             }
             heroAnimator.SetBool("moving", true);
             speed = -HERO_BASE_SPEED;
@@ -111,7 +133,7 @@ public class HeroController : MonoBehaviour
         {
             speed = speed * HERO_ATTACKING_SPEED_PENALTY; // decrease speed if attacking
         } 
-        else if (heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Swapping"))
+        else if (heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Swapping") && IsGrounded())
         {
             speed = HERO_SWAPPING_SPEED; // super decrease speed when drawing weapons ??
         }
@@ -124,4 +146,19 @@ public class HeroController : MonoBehaviour
             transform.Translate(transform.right * speed * Time.deltaTime); // right is onward!
         }
     }
+
+    public void OnCollisionEnter2D(Collision2D col)
+    {
+        if (col.gameObject.tag == "Item")
+        {
+            print("Got the steak!");
+            Destroy(col.gameObject);
+        }
+    }
+
+    public bool IsGrounded()
+    {
+        return Physics2D.Raycast(transform.position, -Vector2.up, distToGround, groundLayer);
+    }
+
 }
