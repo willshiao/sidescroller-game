@@ -13,6 +13,7 @@ public class HeroController : MonoBehaviour
     public LayerMask groundLayer;
 
     float distToGround;
+    float takeHitCooldownTime;
 
     /* Teakable parameters */
     private const float HERO_BASE_SPEED = 1.6F;
@@ -20,6 +21,8 @@ public class HeroController : MonoBehaviour
     private const float HERO_SWAPPING_SPEED = 0.1F;
     private const float HERO_FREERUN_SPEED_BOOST = 1.4F;
     private const float HERO_JUMP_FORCE = 3.2F;
+
+    public static readonly float HERO_TAKEHIT_COOLDOWN_TIME = 0.5F;
 
     private const float HERO_GROUND_DETECT_RAY_LENGTH = 0.08F;
 
@@ -37,6 +40,7 @@ public class HeroController : MonoBehaviour
         // Don't need this line since it is set in Unity via drag-and-drop
         //heroAnimator = gameObject.GetComponent<Animator>();
         lastMoveDir = "none";
+        takeHitCooldownTime = Time.time;
 
         // Init animator params
         heroAnimator.SetBool("moving", false);
@@ -58,8 +62,13 @@ public class HeroController : MonoBehaviour
             gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.up * HERO_JUMP_FORCE, ForceMode2D.Impulse);
         }
 
-        // Set MOVEMENT animator params based on input
-        if (Input.GetKey("right") && Input.GetKey("left"))
+        if (takeHitCooldownTime <= Time.time && gameObject.GetComponent<SpriteRenderer>().color == Color.red)
+        {
+            gameObject.GetComponent<SpriteRenderer>().color = Color.white;
+        }
+
+            // Set MOVEMENT animator params based on input
+            if (Input.GetKey("right") && Input.GetKey("left"))
         {
             heroAnimator.SetBool("moving", true);
             bool flipX = false;
@@ -153,6 +162,16 @@ public class HeroController : MonoBehaviour
         {
             print("Got the steak!");
             Destroy(col.gameObject);
+        }
+    }
+
+    public void TakeHit(int dmg)
+    {
+        if (takeHitCooldownTime <= Time.time)
+        {
+            print("Hero took " + dmg + "damage!");
+            gameObject.GetComponent<SpriteRenderer>().color = Color.red;
+            takeHitCooldownTime = Time.time + HERO_TAKEHIT_COOLDOWN_TIME;
         }
     }
 

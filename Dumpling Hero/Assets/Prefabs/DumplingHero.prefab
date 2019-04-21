@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6033632616723071549}
   - component: {fileID: 6033632616723071551}
   - component: {fileID: 6033632616723071548}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: DumplingHero
   m_TagString: Player
   m_Icon: {fileID: 0}

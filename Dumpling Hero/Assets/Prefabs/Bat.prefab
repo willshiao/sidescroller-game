@@ -119,11 +119,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   batAnimator: {fileID: 6924018212544110063}
   batBodies: []
-  sc: {fileID: 0}
-  playerTransform: {fileID: 6033632616723071538, guid: 10f2753313ae61a498bbaa7603bf36ec,
-    type: 3}
   CBTprefab: {fileID: 4593209563674351034, guid: 317811c7761d66049829bef5548b7edf,
     type: 3}
+  friendlyLayer:
+    serializedVersion: 2
+    m_Bits: 512
   batHealth: 0
   batSpeed: 0
   framesToRandoMove: 0

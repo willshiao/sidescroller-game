@@ -9,28 +9,37 @@ public class BatController : MonoBehaviour
     public PolygonCollider2D[] batBodies;
 
     // Score Controller
-    public ScoreController sc;
+    ScoreController sc;
 
-    // Player Transform
-    public Transform playerTransform;
+    // Player Transform (to track)
+    Transform playerTransform;
 
     // Combat Text object
     public GameObject CBTprefab;
 
+    public LayerMask friendlyLayer;
+
     // Bat's current stats
-    public int batHealth;
-    public float batSpeed;
+    int batHealth;
+    float batSpeed;
+    float batSpeedChange;
+    float batSpeedTarget;
 
     // Counter of how many frames to stay in 'Hesitate'
     public int framesToRandoMove;
 
     private float batRandoMoveCooldownTime;
+    private float batAttackCooldownTime;
 
     // Bat Tweakables
     const float BAT_BASE_MOVE_SPEED = 0.8F;
     const int BAT_BASE_HEALTH_POOL = 10;
     const float BAT_DETECT_PROXIMITY = 3.0F;
-    const float BAT_ATTACK_PROXIMITY= 0.5F;
+    const float BAT_ATTACK_PROXIMITY = 0.5F;
+    const float BAT_MELEE_RANGE = 0.1F;
+    public static readonly float BAT_ATTACK_COOLDOWN_TIME = 2.5F;
+    public static readonly int[] BAT_BASE_DAMAGE = {1, 3};
+    public static readonly float BAT_ATTACK_MOVE_SPEED = 0.4F;
     const float BAT_RANDOMOVE_CHANCE = 0.0001F;
     const float BAT_RANDOMOVE_SECONDS = 0.7F;
     const float BAT_RANDOMOVE_MAX_COOLDOWN_TIME = 5; // in seconds
@@ -42,6 +51,27 @@ public class BatController : MonoBehaviour
         batHealth = BAT_BASE_HEALTH_POOL;
         batBodies = GetComponents<PolygonCollider2D>();
         framesToRandoMove = 0;
+        batAttackCooldownTime = Time.time;
+
+        // Get reference to score updater
+        if (GameObject.Find("ScoreText") == null)
+        {
+            print("Friendly Error: Cannot find ScoreText Game Object (import GameData object from Prefabs)");
+        }
+        else
+        {
+            sc = GameObject.Find("ScoreText").GetComponent<ScoreController>();
+        }
+
+        // Get reference to player transform
+        if (GameObject.FindGameObjectWithTag("Player") == null)
+        {
+            print("Friendly Error: Cannot find a Player Game Object (make sure GameObject.Tag = Player)");
+        }
+        else
+        {
+            playerTransform = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
+        }
     }
 
     // Update is called once per frame
@@ -53,6 +83,15 @@ public class BatController : MonoBehaviour
         {
             sc.UpdateScore(BAT_POINTS_PER_KILL);
             Destroy(gameObject);
+            return;
+        }
+        
+        if (batAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Attack"))
+        {
+
+            // wait for the attack to finish
+            BatMeleeActive();
+            return;
         }
 
         /*-------------------------------*/
@@ -75,10 +114,15 @@ public class BatController : MonoBehaviour
         {
             framesToRandoMove--;
         }
-        else if (Vector2.Distance((Vector2)playerTransform.position, (Vector2)transform.position) < BAT_ATTACK_PROXIMITY) // Check if Bat is in attack proximity
+        // Check if Bat is in attack proximity & check attack cooldown
+        else if (Vector2.Distance((Vector2)playerTransform.position, (Vector2)transform.position) < BAT_ATTACK_PROXIMITY  && Time.time >= batAttackCooldownTime)
         {
-            // charge in direction of player until Bat is out of range
-            batSpeed = batAnimator.GetInteger("xHeading") * BAT_BASE_MOVE_SPEED * 2.5F; //speed boost = attack, i guess
+            // Set trigger for animation
+            batAnimator.SetTrigger("attack");
+            batSpeed = BAT_ATTACK_MOVE_SPEED * batAnimator.GetInteger("xHeading"); ;
+            BatMeleeActive();
+
+            batAttackCooldownTime = Time.time + BAT_ATTACK_COOLDOWN_TIME;
         }
         else if (Time.time >= batRandoMoveCooldownTime && Random.Range(0, 1) < BAT_RANDOMOVE_CHANCE) // Roll chance to go random direction
         {
@@ -176,6 +220,21 @@ public class BatController : MonoBehaviour
 
             // Set damage string
             temp.GetComponent<Text>().text = damage.ToString();
+        }
+    }
+
+    private void BatMeleeActive()
+    {
+        Debug.DrawRay(transform.position, batAnimator.GetInteger("xHeading") * Vector2.right * BAT_MELEE_RANGE, Color.red);
+        var raycastMelee = Physics2D.Raycast(transform.position, batAnimator.GetInteger("xHeading") * Vector2.right, BAT_MELEE_RANGE, friendlyLayer);
+
+        if (raycastMelee.collider != null)
+        {
+            if (raycastMelee.collider.tag == "Player")
+            {
+                int batDmg = (int)Mathf.Round(Random.Range(BAT_BASE_DAMAGE[0], BAT_BASE_DAMAGE[1]));
+                raycastMelee.collider.gameObject.GetComponent<HeroController>().TakeHit(batDmg);
+            }
         }
     }
 
