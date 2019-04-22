@@ -31,6 +31,7 @@ public class BatController : MonoBehaviour
     float batRandoMoveCooldownTime;
     float batAttackCooldownTime;
     float batStunTimer;
+    float batChangeDirectionTimer;
 
     // Bat Tweakables
     public static readonly float BAT_BASE_MOVE_SPEED = 0.8F;
@@ -39,13 +40,16 @@ public class BatController : MonoBehaviour
     public static readonly float BAT_ATTACK_PROXIMITY = 0.2F;
     public static readonly float BAT_MELEE_RANGE = 0.15F;
     public static readonly float BAT_STUN_TIME = 0.5F;
+    public static readonly float BAT_STUN_MOVE_SPEED = 0.1F;
     public static readonly float BAT_ATTACK_COOLDOWN_TIME = 2.5F;
     public static readonly int[] BAT_BASE_DAMAGE = {1, 3};
     public static readonly float BAT_ATTACK_MOVE_SPEED = 0.4F;
-    public static readonly float BAT_STUN_MOVE_SPEED = 0.1F;
-    public static readonly float BAT_RANDOMOVE_CHANCE = 0.0001F;
+    public static readonly float BAT_WALL_DETECT_RANGE = 0.25F;
+    public static readonly float BAT_CHANGE_DIR_TIME = 0.75F;
+    public static readonly float BAT_RANDOMOVE_CHANCE = 0.0006F;
     public static readonly float BAT_RANDOMOVE_SECONDS = 0.7F;
-    public static readonly float BAT_RANDOMOVE_MAX_COOLDOWN_TIME = 5; // in seconds
+    public static readonly float BAT_RANDOMOVE_MAX_COOLDOWN_TIME = 10; // in seconds
+
     public static readonly int   BAT_POINTS_PER_KILL = 10;
 
     // Start is called before the first frame update
@@ -61,6 +65,7 @@ public class BatController : MonoBehaviour
         framesToRandoMove = 0;
         batAttackCooldownTime = Time.time;
         batStunTimer = 0;
+        batChangeDirectionTimer = 0;
 
         // Get reference to score updater
         if (GameObject.Find("ScoreText") == null)
@@ -171,14 +176,15 @@ public class BatController : MonoBehaviour
             batRandoMoveCooldownTime = Time.time + Random.Range(0.1F, 1.0F) * BAT_RANDOMOVE_MAX_COOLDOWN_TIME;
 
         }
-        else // Go towards player if player is in range
+        else 
         {
 
+            // Go idle if out of range of player
             if (Vector2.Distance(playerTransform.position, transform.position) > BAT_DETECT_PROXIMITY)
             {
                 batAnimator.SetInteger("xHeading", 0);
             }
-            else
+            else if (batChangeDirectionTimer <= Time.time) // else change direction if ready
             {
                 if (IsLeftOrRightOfMe(playerTransform) == 'L')
                 {
@@ -192,11 +198,19 @@ public class BatController : MonoBehaviour
                 {
                     batAnimator.SetInteger("xHeading", 0);
                 }
+                batChangeDirectionTimer = Time.time + BAT_CHANGE_DIR_TIME;
             }
 
             // Set Bat speed
             batSpeed = batAnimator.GetInteger("xHeading") * BAT_BASE_MOVE_SPEED;
 
+        }
+
+        // Go idle if run into a wall
+        if (DetectAWall())
+        {
+            batAnimator.SetInteger("xHeading", 0);
+            batSpeed = 0;
         }
 
         // Enable the correct bat body collider
@@ -248,6 +262,15 @@ public class BatController : MonoBehaviour
             // Set damage string
             temp.GetComponent<Text>().text = damage.ToString();
         }
+    }
+
+    private bool DetectAWall()
+    {
+        int heading = batAnimator.GetInteger("xHeading");
+        //Vector2 startSpot = (Vector2)transform.position + new Vector2(heading * GetComponent<PolygonCollider2D>().bounds.extents.x, 0.0F);
+        Vector2 startSpot = transform.position;
+        Debug.DrawRay(startSpot, heading * Vector2.right * BAT_WALL_DETECT_RANGE, Color.blue);
+        return Physics2D.Raycast(startSpot, heading * Vector2.right, BAT_WALL_DETECT_RANGE, LayerMask.GetMask("Groundable"));
     }
 
     private void BatMeleeActive()

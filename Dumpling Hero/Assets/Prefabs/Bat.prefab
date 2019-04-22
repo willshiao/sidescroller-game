@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 6924018212544110061}
   - component: {fileID: 6924018212544110051}
   - component: {fileID: 6924018212544110050}
-  m_Layer: 8
+  m_Layer: 10
   m_Name: Bat
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -119,9 +119,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CBTprefab: {fileID: 4593209563674351034, guid: 317811c7761d66049829bef5548b7edf,
     type: 3}
-  friendlyLayer:
-    serializedVersion: 2
-    m_Bits: 512
 --- !u!60 &6924018212544110048
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -247,7 +244,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6924018212544110056}
-  m_BodyType: 0
+  m_BodyType: 1
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
