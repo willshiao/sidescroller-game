@@ -6,15 +6,15 @@ using UnityEngine.UI;
 public class BatController : MonoBehaviour
 {
 
+    // Animator & body colliders
+    Animator batAnimator;
+    PolygonCollider2D[] batBodies;
+
     // Combat Text object
     public GameObject CBTprefab;
 
     // Friendly Layer  Mask
-    public LayerMask friendlyLayer;
-
-    // Animator & body colliders
-    Animator batAnimator;
-    PolygonCollider2D[] batBodies;
+    LayerMask friendlyLayer;
 
     // Score Controller
     ScoreController sc;
@@ -55,6 +55,8 @@ public class BatController : MonoBehaviour
 
         batAnimator = GetComponent<Animator>();
         batBodies = GetComponents<PolygonCollider2D>();
+
+        friendlyLayer = LayerMask.GetMask("Friendly");
 
         framesToRandoMove = 0;
         batAttackCooldownTime = Time.time;

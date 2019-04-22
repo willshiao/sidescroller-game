@@ -4,8 +4,7 @@ using UnityEngine;
 
 public class SwordSlash : MonoBehaviour
 {
-    public GameObject hero;
-
+    GameObject hero;
     PolygonCollider2D[] swordSlashes;
     SpriteRenderer heroSR;
 
@@ -17,6 +16,9 @@ public class SwordSlash : MonoBehaviour
     {
         // get reference to sword slash colliders
         swordSlashes = GetComponents<PolygonCollider2D>();
+
+        // get reference to hero object
+        hero = GameObject.FindGameObjectWithTag("Player");
 
         // get reference to hero's sprite renderer
         heroSR = hero.GetComponent<SpriteRenderer>();

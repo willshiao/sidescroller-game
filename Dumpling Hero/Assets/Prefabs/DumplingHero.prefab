@@ -115,11 +115,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f38a1c2c7bf35f744a3302ce2d4dddbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  heroAnimator: {fileID: 6033632616723071536}
-  heroBodyCollider: {fileID: 6033632616723071548}
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 256
 --- !u!50 &6033632616723071551
 Rigidbody2D:
   serializedVersion: 4
@@ -214,10 +209,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4de0b3165bf7a849b3a86a2dba54925, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  heroSR: {fileID: 6033632616723071539}
   hero: {fileID: 6033632616723071537}
-  swordSlashes: []
-  numSwordSlashes: 0
 --- !u!60 &6033632617612217337
 PolygonCollider2D:
   m_ObjectHideFlags: 0

@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class HeroController : MonoBehaviour
 {
-    // Ground Layer Mask
-    public LayerMask groundLayer;
+    // Ref to Ground Layer
+    LayerMask groundLayer;
 
     // Hero animator and body collider
     Animator heroAnimator;
@@ -22,9 +22,9 @@ public class HeroController : MonoBehaviour
     /* Teakable parameters */
     public static readonly float HERO_BASE_SPEED = 1.6F;
     public static readonly float HERO_ATTACKING_SPEED_PENALTY = 0.25F; // try 4.0F if you wanna be a jedi
-    public static readonly float HERO_SWAPPING_SPEED = 0.1F;
+    public static readonly float HERO_SWAPPING_SPEED_PENALTY = 0.5F;
     public static readonly float HERO_FREERUN_SPEED_BOOST = 1.4F;
-    public static readonly float HERO_JUMP_FORCE = 3.2F;
+    public static readonly float HERO_JUMP_FORCE = 3.2F; 
     public static readonly int   HERO_BASE_HEALTH = 5;
     public static readonly float HERO_TAKEHIT_COOLDOWN_TIME = 0.5F;
     public static readonly float HERO_GROUND_DETECT_RAY_LENGTH = 0.08F;
@@ -45,6 +45,8 @@ public class HeroController : MonoBehaviour
         takeHitCooldownTime = Time.time;
 
         heroHealth = HERO_BASE_HEALTH;
+
+        groundLayer = LayerMask.GetMask("Groundable");
 
         heroAnimator = GetComponent<Animator>();
         heroBodyCollider = GetComponent<BoxCollider2D>();
@@ -154,19 +156,21 @@ public class HeroController : MonoBehaviour
             heroAnimator.SetBool("startAttack", false);
         }
 
-        // Move hero based on animator params
+        // Adjust speed based on hero's current state and Animator parameters
         if (heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Attack"))
         {
             speed = speed * HERO_ATTACKING_SPEED_PENALTY; // decrease speed if attacking
         } 
         else if (heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Swapping") && IsGrounded())
         {
-            speed = HERO_SWAPPING_SPEED; // super decrease speed when drawing weapons ??
+            speed = speed * HERO_SWAPPING_SPEED_PENALTY; // decrease speed when drawing weapons
         }
         else if (!heroAnimator.GetBool("swordEquipped"))
         {
             speed = speed * HERO_FREERUN_SPEED_BOOST; // increase speed if you do not have your sword out
         }
+
+        // Move
         if (heroAnimator.GetBool("moving"))
         {
             transform.Translate(transform.right * speed * Time.deltaTime); // right is onward!
