@@ -5,8 +5,16 @@ using UnityEngine.UI;
 
 public class BatController : MonoBehaviour
 {
-    public Animator batAnimator;
-    public PolygonCollider2D[] batBodies;
+
+    // Combat Text object
+    public GameObject CBTprefab;
+
+    // Friendly Layer  Mask
+    public LayerMask friendlyLayer;
+
+    // Animator & body colliders
+    Animator batAnimator;
+    PolygonCollider2D[] batBodies;
 
     // Score Controller
     ScoreController sc;
@@ -14,44 +22,43 @@ public class BatController : MonoBehaviour
     // Player Transform (to track)
     Transform playerTransform;
 
-    // Combat Text object
-    public GameObject CBTprefab;
-
-    public LayerMask friendlyLayer;
-
     // Bat's current stats
     int batHealth;
     float batSpeed;
-    float batSpeedChange;
-    float batSpeedTarget;
 
-    // Counter of how many frames to stay in 'Hesitate'
-    public int framesToRandoMove;
-
-    private float batRandoMoveCooldownTime;
-    private float batAttackCooldownTime;
+    // Working trackers and variables
+    int framesToRandoMove;
+    float batRandoMoveCooldownTime;
+    float batAttackCooldownTime;
+    float batStunTimer;
 
     // Bat Tweakables
-    const float BAT_BASE_MOVE_SPEED = 0.8F;
-    const int BAT_BASE_HEALTH_POOL = 10;
-    const float BAT_DETECT_PROXIMITY = 3.0F;
-    const float BAT_ATTACK_PROXIMITY = 0.5F;
-    const float BAT_MELEE_RANGE = 0.1F;
+    public static readonly float BAT_BASE_MOVE_SPEED = 0.8F;
+    public static readonly int   BAT_BASE_HEALTH_POOL = 10;
+    public static readonly float BAT_DETECT_PROXIMITY = 3.0F;
+    public static readonly float BAT_ATTACK_PROXIMITY = 0.2F;
+    public static readonly float BAT_MELEE_RANGE = 0.15F;
+    public static readonly float BAT_STUN_TIME = 0.5F;
     public static readonly float BAT_ATTACK_COOLDOWN_TIME = 2.5F;
     public static readonly int[] BAT_BASE_DAMAGE = {1, 3};
     public static readonly float BAT_ATTACK_MOVE_SPEED = 0.4F;
-    const float BAT_RANDOMOVE_CHANCE = 0.0001F;
-    const float BAT_RANDOMOVE_SECONDS = 0.7F;
-    const float BAT_RANDOMOVE_MAX_COOLDOWN_TIME = 5; // in seconds
-    const int BAT_POINTS_PER_KILL = 10;
+    public static readonly float BAT_STUN_MOVE_SPEED = 0.1F;
+    public static readonly float BAT_RANDOMOVE_CHANCE = 0.0001F;
+    public static readonly float BAT_RANDOMOVE_SECONDS = 0.7F;
+    public static readonly float BAT_RANDOMOVE_MAX_COOLDOWN_TIME = 5; // in seconds
+    public static readonly int   BAT_POINTS_PER_KILL = 10;
 
     // Start is called before the first frame update
     void Start()
     {
         batHealth = BAT_BASE_HEALTH_POOL;
+
+        batAnimator = GetComponent<Animator>();
         batBodies = GetComponents<PolygonCollider2D>();
+
         framesToRandoMove = 0;
         batAttackCooldownTime = Time.time;
+        batStunTimer = 0;
 
         // Get reference to score updater
         if (GameObject.Find("ScoreText") == null)
@@ -66,7 +73,7 @@ public class BatController : MonoBehaviour
         // Get reference to player transform
         if (GameObject.FindGameObjectWithTag("Player") == null)
         {
-            print("Friendly Error: Cannot find a Player Game Object (make sure GameObject.Tag = Player)");
+            print("BatController: Cannot find a Player Game Object (make sure GameObject.Tag = Player)");
         }
         else
         {
@@ -78,26 +85,29 @@ public class BatController : MonoBehaviour
     void Update()
     {
 
+        /*-------------------------------*/
+        /*           CHECK STATE         */
+        /*-------------------------------*/
         // If Bat sprite has change to Genric_Empty, destroy itself
         if (batAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Vanished"))
         {
+            batBodies[0].enabled = false;
+            batBodies[1].enabled = false;
+            batBodies[2].enabled = false;
+
             sc.UpdateScore(BAT_POINTS_PER_KILL);
             Destroy(gameObject);
+
             return;
         }
-        
-        if (batAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Attack"))
+
+        // If Bat is currently stunned and alive
+        if (batHealth > 0 && batStunTimer > Time.time)
         {
-
-            // wait for the attack to finish
-            BatMeleeActive();
+            batSpeed = BAT_STUN_MOVE_SPEED * batAnimator.GetInteger("xHeading"); ;
             return;
         }
-
-        /*-------------------------------*/
-        /*         ACTION CHOICE         */
-        /*-------------------------------*/
-        if (batHealth <= 0) // Die, if dead
+        else if (batHealth <= 0) // Die, if dead
         {
             if (batAnimator.GetInteger("xHeading") > 0)
             {
@@ -110,7 +120,20 @@ public class BatController : MonoBehaviour
             batSpeed = 0;
             return;
         }
-        else if (framesToRandoMove > 0) // Check if Bat is hesitating already
+
+        // If Bat is in attack animation
+        if (batAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Attack"))
+        {
+
+            // wait for the attack to finish
+            BatMeleeActive();
+            return;
+        }
+
+        /*-------------------------------*/
+        /*         ACTION CHOICE         */
+        /*-------------------------------*/
+        if (framesToRandoMove > 0) // Check if Bat is hesitating already
         {
             framesToRandoMove--;
         }
@@ -119,9 +142,9 @@ public class BatController : MonoBehaviour
         {
             // Set trigger for animation
             batAnimator.SetTrigger("attack");
-            batSpeed = BAT_ATTACK_MOVE_SPEED * batAnimator.GetInteger("xHeading"); ;
-            BatMeleeActive();
 
+            // Init bat attack params
+            batSpeed = BAT_ATTACK_MOVE_SPEED * batAnimator.GetInteger("xHeading"); ;
             batAttackCooldownTime = Time.time + BAT_ATTACK_COOLDOWN_TIME;
         }
         else if (Time.time >= batRandoMoveCooldownTime && Random.Range(0, 1) < BAT_RANDOMOVE_CHANCE) // Roll chance to go random direction
@@ -205,6 +228,8 @@ public class BatController : MonoBehaviour
         {
             // Take damage
             batHealth = batHealth - damage;
+
+            batStunTimer = Time.time + BAT_STUN_TIME;
 
             // Instantiate Combat numbers prefab
             GameObject temp = Instantiate(CBTprefab) as GameObject;

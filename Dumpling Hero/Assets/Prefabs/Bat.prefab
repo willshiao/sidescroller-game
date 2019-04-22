@@ -117,16 +117,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: faf3765a10cf94b499ad3daed1651a29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  batAnimator: {fileID: 6924018212544110063}
-  batBodies: []
   CBTprefab: {fileID: 4593209563674351034, guid: 317811c7761d66049829bef5548b7edf,
     type: 3}
   friendlyLayer:
     serializedVersion: 2
     m_Bits: 512
-  batHealth: 0
-  batSpeed: 0
-  framesToRandoMove: 0
 --- !u!60 &6924018212544110048
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -314,7 +309,8 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 2
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 7556542490674804120, guid: fd059e058e52e994b89093c7bf1f7b58,
+    type: 3}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1

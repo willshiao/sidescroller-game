@@ -4,32 +4,36 @@ using UnityEngine;
 
 public class HeroController : MonoBehaviour
 {
-    public Animator heroAnimator;
-
-    public BoxCollider2D heroBodyCollider;
-
-    private string lastMoveDir;
-
+    // Ground Layer Mask
     public LayerMask groundLayer;
 
+    // Hero animator and body collider
+    Animator heroAnimator;
+    BoxCollider2D heroBodyCollider;
+
+    // Working trackers and variables
+    string lastMoveDir;
     float distToGround;
     float takeHitCooldownTime;
+    
+    // Hero current stats
+    int heroHealth;
 
     /* Teakable parameters */
-    private const float HERO_BASE_SPEED = 1.6F;
-    private const float HERO_ATTACKING_SPEED_PENALTY = 0.25F; // try 4.0F if you wanna be a jedi
-    private const float HERO_SWAPPING_SPEED = 0.1F;
-    private const float HERO_FREERUN_SPEED_BOOST = 1.4F;
-    private const float HERO_JUMP_FORCE = 3.2F;
-
+    public static readonly float HERO_BASE_SPEED = 1.6F;
+    public static readonly float HERO_ATTACKING_SPEED_PENALTY = 0.25F; // try 4.0F if you wanna be a jedi
+    public static readonly float HERO_SWAPPING_SPEED = 0.1F;
+    public static readonly float HERO_FREERUN_SPEED_BOOST = 1.4F;
+    public static readonly float HERO_JUMP_FORCE = 3.2F;
+    public static readonly int   HERO_BASE_HEALTH = 5;
     public static readonly float HERO_TAKEHIT_COOLDOWN_TIME = 0.5F;
-
-    private const float HERO_GROUND_DETECT_RAY_LENGTH = 0.08F;
+    public static readonly float HERO_GROUND_DETECT_RAY_LENGTH = 0.08F;
 
     /* 
      * DUMPLING HERO CONTROLS 
      * left arrow  = move left
      * right arrow = move right
+     * up arrow    = jump
      * spacebar    = draw sword / attack
      * X           = stow sword / draw sword
      */
@@ -37,10 +41,13 @@ public class HeroController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // Don't need this line since it is set in Unity via drag-and-drop
-        //heroAnimator = gameObject.GetComponent<Animator>();
         lastMoveDir = "none";
         takeHitCooldownTime = Time.time;
+
+        heroHealth = HERO_BASE_HEALTH;
+
+        heroAnimator = GetComponent<Animator>();
+        heroBodyCollider = GetComponent<BoxCollider2D>();
 
         // Init animator params
         heroAnimator.SetBool("moving", false);
@@ -55,6 +62,15 @@ public class HeroController : MonoBehaviour
     {
         float speed = 0;
 
+        if (heroHealth <= 0)
+        {
+            if (!heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Dead"))
+            {
+                heroAnimator.SetTrigger("dead");
+            }
+            return;
+        }
+
         // Apply Jump Force if pressed & grounded
         Debug.DrawRay(transform.position, Vector2.down * distToGround, Color.green);
         if (Input.GetKeyDown(KeyCode.UpArrow) && IsGrounded())
@@ -62,13 +78,14 @@ public class HeroController : MonoBehaviour
             gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.up * HERO_JUMP_FORCE, ForceMode2D.Impulse);
         }
 
+        // Change Hero hew back to white if hero can be hit again
         if (takeHitCooldownTime <= Time.time && gameObject.GetComponent<SpriteRenderer>().color == Color.red)
         {
             gameObject.GetComponent<SpriteRenderer>().color = Color.white;
         }
 
-            // Set MOVEMENT animator params based on input
-            if (Input.GetKey("right") && Input.GetKey("left"))
+        // Set MOVEMENT animator params based on input
+        if (Input.GetKey("right") && Input.GetKey("left"))
         {
             heroAnimator.SetBool("moving", true);
             bool flipX = false;
@@ -160,16 +177,18 @@ public class HeroController : MonoBehaviour
     {
         if (col.gameObject.tag == "Item")
         {
-            print("Got the steak!");
+            heroHealth = HERO_BASE_HEALTH;
             Destroy(col.gameObject);
+            print("Got the steak! Current health = " + heroHealth);
         }
     }
 
     public void TakeHit(int dmg)
     {
-        if (takeHitCooldownTime <= Time.time)
+        if (takeHitCooldownTime <= Time.time && heroHealth > 0)
         {
-            print("Hero took " + dmg + "damage!");
+            heroHealth -= dmg;
+            print("Hero took " + dmg + " damage! Current Health = " + heroHealth);
             gameObject.GetComponent<SpriteRenderer>().color = Color.red;
             takeHitCooldownTime = Time.time + HERO_TAKEHIT_COOLDOWN_TIME;
         }

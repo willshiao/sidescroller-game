@@ -5,40 +5,43 @@ using UnityEngine.UI;
 
 public class DebugTextController : MonoBehaviour
 {
-    public string playerModsText;
-
+    string playerModsText;
     Text debugText;
+    Animator heroAnimator;
 
     // Start is called before the first frame update
     void Start()
     {
         debugText = GetComponent<Text>();
+
+        if (GameObject.FindGameObjectWithTag("Player") == null)
+        {
+            print("DebugTextController: could not find an object with tag = 'Player'");
+        }
+        else
+        {
+            heroAnimator = GameObject.FindGameObjectWithTag("Player").GetComponent<Animator>();
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
 
-        // Probably could do this in the Awake or Start function !!
-        // Should only check if something changes, not every frame
-
-        if (GameObject.FindGameObjectWithTag("Player") == null)
-        {
-            debugText.text = "Use the 'Player' tag on your player gamme object\nto view moves unlocked";
-            return;
-        }
-
+        // Form the DebugText string
         playerModsText = "Moves Unlocked:\n";
-        if (GameObject.FindGameObjectWithTag("Player").GetComponent<Animator>().GetBool("spinAttackUnlocked"))
+        if (heroAnimator.GetBool("spinAttackUnlocked"))
         {
             playerModsText = playerModsText + "SpinAttack\n";
         }
+
+        // add other stuff to string here...
+
 
         if (playerModsText == "Moves Unlocked:\n")
         {
             playerModsText = playerModsText + "none";
         }
-
         debugText.text = playerModsText;
     }
 }

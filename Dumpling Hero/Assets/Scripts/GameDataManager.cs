@@ -5,20 +5,21 @@ using UnityEngine.SceneManagement;
 
 public class GameDataManager : MonoBehaviour
 {
-
-    private string currentLevelScenePath;
-
-    public GameObject hero;
+    string currentLevelScenePath;
+    GameObject hero;
 
     // Start is called before the first frame update
     void Start()
     {
-        hero = GameObject.FindGameObjectWithTag("Player");
-
         // Set unlocks and modifiers
-        if (hero != null)
+        if (GameObject.FindGameObjectWithTag("Player") != null)
         {
+            hero = GameObject.FindGameObjectWithTag("Player");
             hero.GetComponent<Animator>().SetBool("spinAttackUnlocked", true);
+        }
+        else
+        {
+            print("GameDataManager: could not find object with tag 'Player'");
         }
 
         // so dev can start whatever scene, and Reset Button will point to it
@@ -32,6 +33,7 @@ public class GameDataManager : MonoBehaviour
         
     }
 
+    // Called when Reset Scene button is pressed
     public void ResetScene()
     {
         //print("Loading Scene: " + currentLevelScenePath);

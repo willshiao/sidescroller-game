@@ -4,26 +4,22 @@ using UnityEngine;
 
 public class SwordSlash : MonoBehaviour
 {
-    public SpriteRenderer heroSR;
-
     public GameObject hero;
 
-    public PolygonCollider2D[] swordSlashes;
-    public int numSwordSlashes;
+    PolygonCollider2D[] swordSlashes;
+    SpriteRenderer heroSR;
 
     // Sword damage Teakables
-    const int SWORD_BASE_ATTACK_DMG_MIN =  4;
-    const int SWORD_BASE_ATTACK_DMG_MAX = 10;
-
+    public static readonly int[] SWORD_BASE_ATTACK_DAMAGE = { 4, 10 };
 
     // Start is called before the first frame update
     void Start()
     {
+        // get reference to sword slash colliders
         swordSlashes = GetComponents<PolygonCollider2D>();
-        numSwordSlashes = swordSlashes.Length;
 
         // get reference to hero's sprite renderer
-        heroSR = GameObject.FindGameObjectWithTag("Player").GetComponent<SpriteRenderer>();
+        heroSR = hero.GetComponent<SpriteRenderer>();
     }
 
     // Update is called once per frame
@@ -53,7 +49,7 @@ public class SwordSlash : MonoBehaviour
         }
         else
         {
-            for (int i=0; i<numSwordSlashes; i++)
+            for (int i=0; i< swordSlashes.Length; i++)
             {
                 swordSlashes[i].enabled = false;
             }
@@ -71,7 +67,7 @@ public class SwordSlash : MonoBehaviour
 
     public int GetSwordDamage()
     {
-        return (int)Random.Range(SWORD_BASE_ATTACK_DMG_MIN, SWORD_BASE_ATTACK_DMG_MAX);
+        return (int)Random.Range(SWORD_BASE_ATTACK_DAMAGE[0], SWORD_BASE_ATTACK_DAMAGE[1]);
     }
 
 }
