@@ -10,6 +10,8 @@ TagManager:
   - Item
   - DamageEnemy
   - Ground
+  - FreeBlock
+  - Explodable
   layers:
   - Default
   - TransparentFX

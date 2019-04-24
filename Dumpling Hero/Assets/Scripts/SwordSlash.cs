@@ -61,9 +61,14 @@ public class SwordSlash : MonoBehaviour
     // When the sword hits something...
     public void OnCollisionEnter2D(Collision2D col)
     {
+        int swordDamage = GetSwordDamage();
         if (col.gameObject.name == "Bat")
         {
-            col.gameObject.GetComponent<BatController>().TakeHit(GetSwordDamage());
+            col.gameObject.GetComponent<BatController>().TakeHit(swordDamage);
+        }
+        if (col.gameObject.tag == "Explodable")
+        {
+            col.gameObject.GetComponent<BombCrate>().TakeHit(swordDamage);
         }
     }
 

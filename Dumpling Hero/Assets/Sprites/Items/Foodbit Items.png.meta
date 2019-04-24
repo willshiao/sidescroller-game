@@ -419,6 +419,7 @@ TextureImporter:
     21300828: Foodbit Items_539
     21300830: Foodbit Items_540
     21300832: Foodbit Items_541
+    21300834: Foodbit Items_174_again
   externalObjects: {}
   serializedVersion: 9
   mipmaps:
@@ -2779,8 +2780,8 @@ TextureImporter:
         y: 548
         width: 17
         height: 23
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      alignment: 9
+      pivot: {x: 0.5294118, y: 0.43478262}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -8847,6 +8848,26 @@ TextureImporter:
       tessellationDetail: 0
       bones: []
       spriteID: bdc4eb69fbb1376428d0e457545d0a87
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Foodbit Items_174_again
+      rect:
+        serializedVersion: 2
+        x: 261
+        y: 548
+        width: 17
+        height: 23
+      alignment: 9
+      pivot: {x: 0.5294118, y: 0.4347826}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 16d5e67a2ef3cd240aaa61ef6c398f34
       vertices: []
       indices: 
       edges: []
