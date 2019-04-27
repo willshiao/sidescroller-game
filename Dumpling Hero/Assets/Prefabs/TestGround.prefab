@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8719976144284226226}
   - component: {fileID: 8719976144284226229}
   m_Layer: 8
-  m_Name: jungle tileset_0
+  m_Name: TestGround
   m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26,7 +26,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8719976144284226231}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.06, y: -0.88, z: 10}
+  m_LocalPosition: {x: 0.06, y: -0.88, z: 15}
   m_LocalScale: {x: 1.6788299, y: 1.26445, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
