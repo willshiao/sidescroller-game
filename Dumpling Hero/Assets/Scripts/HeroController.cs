@@ -17,13 +17,11 @@ public class HeroController : MonoBehaviour
     bool   doubleJumpUsed;
     float  distToWall;
     bool   wallGrabKeyInputValid;
-
-    // Hero current stats
-    int heroHealth;
+    int    heroHealth;
 
     /* Teakable parameters */
     public static readonly float HERO_BASE_SPEED = 1.88F;
-    public static readonly float HERO_ATTACKING_SPEED_PENALTY = 0.25F; // try 4.0F if you wanna be a jedi
+    public static readonly float HERO_ATTACKING_SPEED_PENALTY = 0.41F;
     public static readonly float HERO_SWAPPING_SPEED_PENALTY = 0.5F;
     public static readonly float HERO_FREERUN_SPEED_BOOST = 1.20F;
     public static readonly float HERO_JUMP_FORCE = 3.2F;
@@ -31,7 +29,7 @@ public class HeroController : MonoBehaviour
     public static readonly int   HERO_BASE_HEALTH = 5;
 
     public static readonly float HERO_CLIMB_SPEED = 0.8F;
-    public static readonly float HERO_MIDAIR_SPEED_PENALTY = 0.62F;
+    public static readonly float HERO_MIDAIR_SPEED_PENALTY = 0.67F;
 
     public static readonly float HERO_TAKEHIT_COOLDOWN_TIME = 0.5F;
     public static readonly float HERO_GROUND_DETECT_RAY_LENGTH = 0.065F;
@@ -39,9 +37,9 @@ public class HeroController : MonoBehaviour
 
     /* 
      * DUMPLING HERO CONTROLS 
-     * left arrow  = move left
-     * right arrow = move right
-     * up arrow    = jump
+     * left arrow  = move left / climb left wall
+     * right arrow = move right / climb right wall
+     * up arrow    = jump / double-jump
      * spacebar    = draw sword / attack
      * X           = stow sword / draw sword
      */
@@ -49,25 +47,22 @@ public class HeroController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // Initialize working variables
         lastMoveDir = "none";
         takeHitCooldownTime = Time.time;
         doubleJumpUsed = false;
         wallGrabKeyInputValid = true;
-
         heroHealth = HERO_BASE_HEALTH;
 
+        // Get components
         heroAnimator = GetComponent<Animator>();
         heroBodyCollider = GetComponent<BoxCollider2D>();
 
-        // Set ground sensors based on the width of his box collider
-        heroGroundDetectExtends = heroBodyCollider.bounds.extents.x/2.0F; // 0.0376 ish
+        // Set ground & wall sensors starting point
+        heroGroundDetectExtends = heroBodyCollider.bounds.extents.x/2.0F;
         heroWallDetectHeight = heroBodyCollider.bounds.extents.y;
 
-        // Init animator params
-        heroAnimator.SetBool("moving", false);
-        heroAnimator.SetBool("startAttack", false);
-
-        // Set Y extent of collider, use to check if hero is on ground
+        // Set ground & wall sensors length
         distToGround = heroBodyCollider.bounds.extents.y + HERO_GROUND_DETECT_RAY_LENGTH;
         distToWall = heroBodyCollider.bounds.extents.x + HERO_WALL_DETECT_RAY_LENGTH;
     }
@@ -75,10 +70,19 @@ public class HeroController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        /* This is how fast hero moves in the x direction.
+         * It gets updated based on the hero's state */
         float speed = 0;
+
+        // Check if grounded or on-a-wall ONCE for this frame
         bool grounded = IsGrounded();
         bool onWall = IsOnWall();
 
+
+        /******************
+         * DEATH & DAMAGE *
+         * ************** */
+        // If dead, stay dead
         if (heroHealth <= 0)
         {
             if (!heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Dead"))
@@ -87,23 +91,26 @@ public class HeroController : MonoBehaviour
             }
             return;
         }
-
-        // Change Hero hew back to white if hero can be hit again
-        if (takeHitCooldownTime <= Time.time && gameObject.GetComponent<SpriteRenderer>().color == Color.red)
+        // If hit cooldown finishes, change Hero hew back to white
+        else if (takeHitCooldownTime <= Time.time && gameObject.GetComponent<SpriteRenderer>().color == Color.red)
         {
             gameObject.GetComponent<SpriteRenderer>().color = Color.white;
         }
 
+
+        /******************
+         *    CLIMBING    *
+         * ************** */
         // If midair and against a wall, climb!
         if (onWall && !grounded)
         {
-             gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(gameObject.GetComponent<Rigidbody2D>().velocity.x, 0.0F);
-             heroAnimator.SetBool("climbing", true);
-             heroAnimator.SetBool("midair", false);
-             doubleJumpUsed = false;
-             transform.Translate(Vector2.up * HERO_CLIMB_SPEED * Time.deltaTime);
+            heroAnimator.SetBool("climbing", true);
+            heroAnimator.SetBool("midair", false);
+            gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(gameObject.GetComponent<Rigidbody2D>().velocity.x, 0.0F);
+            transform.Translate(Vector2.up * HERO_CLIMB_SPEED * Time.deltaTime);
+            doubleJumpUsed = false;
         }
-        else 
+        else // not climbing
         {
             heroAnimator.SetBool("climbing", false);
 
@@ -119,9 +126,14 @@ public class HeroController : MonoBehaviour
             }
         }
 
-        // Debug Rays for ground detection and wall detection
+
+        /******************
+        *    DEBUG RAYS   *
+         * ************** */
+        // Debug Rays for ground detection
         Debug.DrawRay(transform.position + (new Vector3(-heroGroundDetectExtends, 0, 0)), Vector2.down * distToGround, Color.green);
         Debug.DrawRay(transform.position + (new Vector3( heroGroundDetectExtends, 0, 0)), Vector2.down * distToGround, Color.green);
+        // Debug Rays for wall detection
         if (transform.rotation.y / 10 == 0)
         {
             Debug.DrawRay(transform.position + (new Vector3(0, -heroWallDetectHeight * 0.8f, 0)), Vector2.right * distToWall, Color.blue);
@@ -133,6 +145,10 @@ public class HeroController : MonoBehaviour
             Debug.DrawRay(transform.position + (new Vector3(0, heroWallDetectHeight, 0)), Vector2.left * distToWall, Color.blue);
         }
 
+
+        /******************
+         *     JUMPING    *
+         * ************** */
         // Apply Jump Force if pressed & grounded
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
@@ -142,8 +158,8 @@ public class HeroController : MonoBehaviour
                 rigidbody.velocity = new Vector2(rigidbody.velocity.x, 0.0F);
                 gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.up * HERO_JUMP_FORCE, ForceMode2D.Impulse);
 
-                if (onWall && heroAnimator.GetBool("climbing"))
-                    // Set this so you can jump from a wall hold
+                // Set this so you can jump from a wall hold
+                if (onWall && heroAnimator.GetBool("climbing")) 
                     wallGrabKeyInputValid = false;
 
             } 
@@ -155,8 +171,18 @@ public class HeroController : MonoBehaviour
                 heroAnimator.SetTrigger("doubleJump");
                 rigidbody.AddForce(Vector2.up * HERO_DOUBLEJUMP_FORCE, ForceMode2D.Impulse);
             }
-        } 
+        }
 
+        /* -------------------------------------------------- */
+        // If climbing, the rest of the mechanics are disabled
+        if (onWall)
+            return;
+        /* -------------------------------------------------- */
+
+
+        /******************
+         *    MOVEMENT    *
+         * ************** */
         // Set MOVEMENT animator params based on input
         if (Input.GetKey("right") && Input.GetKey("left"))
         {
@@ -205,6 +231,10 @@ public class HeroController : MonoBehaviour
             lastMoveDir = "left";
         }
 
+
+        /***********************
+         *   WEAPONS / ATTACK  *
+         * ******************* */
         // Set WEAPON USE animator params based on input
         if (Input.GetKey(KeyCode.Space))
         {
@@ -222,16 +252,20 @@ public class HeroController : MonoBehaviour
                 heroAnimator.SetBool("swordEquipped", !heroAnimator.GetBool("swordEquipped"));
             }
         }
-        else 
+        else
         {
             heroAnimator.SetBool("startAttack", false);
         }
 
+
+        /***********************
+         *       SET SPEED     *
+         * ******************* */
         // Adjust speed based on hero's current state and Animator parameters
         if (heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Attack"))
         {
             speed = speed * HERO_ATTACKING_SPEED_PENALTY; // decrease speed if attacking
-        } 
+        }
         else if (heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Swapping") && IsGrounded())
         {
             speed = speed * HERO_SWAPPING_SPEED_PENALTY; // decrease speed when drawing weapons
@@ -246,13 +280,18 @@ public class HeroController : MonoBehaviour
             speed = speed * HERO_MIDAIR_SPEED_PENALTY;
         }
 
-        // Move
+
+        /***********************
+         *       TRANSLATE     *
+         * ******************* */
+        // Only move the hero ONCE per frame (right is onward)
         if (heroAnimator.GetBool("moving"))
         {
-            transform.Translate(transform.right * speed * Time.deltaTime); // right is onward!
+            transform.Translate(transform.right * speed * Time.deltaTime);
         }
     }
 
+    // Called when hero body collides with object (col)
     public void OnCollisionEnter2D(Collision2D col)
     {
         if (col.gameObject.tag == "Item")
@@ -263,6 +302,7 @@ public class HeroController : MonoBehaviour
         }
     }
 
+    // Called by other objects that can damage the hero
     public void TakeHit(int dmg)
     {
         if (takeHitCooldownTime <= Time.time && heroHealth > 0)
@@ -274,6 +314,7 @@ public class HeroController : MonoBehaviour
         }
     }
 
+    // Called by other objects that can inflict percentage damage on the hero
     public void TakeHitPerc(float perc)
     {
         if (heroHealth == 1)
@@ -282,32 +323,41 @@ public class HeroController : MonoBehaviour
             TakeHit((int)Mathf.Round((float)heroHealth * perc));
     }
 
-    // Must be holding down corresponding arrow key to be onwall
+    // Called once per frame in update function
     public bool IsOnWall()
     {
         bool wallDetected = DetectWall();
 
-        // When wall grab input is invalid, set it back to valid only if hero leaves wall for a moment (otherwise its impossible to jump away from wall with arrow key down)
+        /* When wall grab input is invalid, set it back to valid only if hero leaves wall for a moment 
+         * this makes it possible for jump to interupt climbing */
         if (!wallGrabKeyInputValid)
             wallGrabKeyInputValid = !wallDetected;
 
+        // Must be walking into wall to be considered "on-a-wall"
         if (transform.rotation.y / 10 == 0)
             return Input.GetKey(KeyCode.RightArrow) && wallGrabKeyInputValid && wallDetected;
         else
             return Input.GetKey(KeyCode.LeftArrow) && wallGrabKeyInputValid && wallDetected;
     }
 
+    // Called once per frame to detect a wall in front of the hero
     public bool DetectWall()
     {
+        // if facing right ( '/ 10' in case y rotation is close to 0 but not 0)
         if (transform.rotation.y / 10 == 0)
+        {
             return (Physics2D.Raycast(transform.position + (new Vector3(0, heroWallDetectHeight, 0)), Vector2.right, distToWall, LayerMask.GetMask("Groundable")) ||
                     Physics2D.Raycast(transform.position + (new Vector3(0, -heroWallDetectHeight * 0.8f, 0)), Vector2.right, distToWall, LayerMask.GetMask("Groundable")));
-        else
+        }
+        else // facing left (y rotation ~= 180)
+        {
             return (Physics2D.Raycast(transform.position + (new Vector3(0, heroWallDetectHeight, 0)), Vector2.left, distToWall, LayerMask.GetMask("Groundable")) ||
                     Physics2D.Raycast(transform.position + (new Vector3(0, -heroWallDetectHeight * 0.8f, 0)), Vector2.left, distToWall, LayerMask.GetMask("Groundable")));
+        }
     }
 
-public bool IsGrounded()
+    // Called once per frame in update function
+    public bool IsGrounded()
     {
         return Physics2D.Raycast(transform.position + (new Vector3( heroGroundDetectExtends, 0, 0)), -Vector2.up, distToGround, LayerMask.GetMask("Groundable")) ||
                Physics2D.Raycast(transform.position + (new Vector3(-heroGroundDetectExtends, 0, 0)), -Vector2.up, distToGround, LayerMask.GetMask("Groundable")) ||
