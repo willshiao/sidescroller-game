@@ -22,10 +22,10 @@ public class HeroController : MonoBehaviour
     int heroHealth;
 
     /* Teakable parameters */
-    public static readonly float HERO_BASE_SPEED = 1.6F;
+    public static readonly float HERO_BASE_SPEED = 1.88F;
     public static readonly float HERO_ATTACKING_SPEED_PENALTY = 0.25F; // try 4.0F if you wanna be a jedi
     public static readonly float HERO_SWAPPING_SPEED_PENALTY = 0.5F;
-    public static readonly float HERO_FREERUN_SPEED_BOOST = 1.4F;
+    public static readonly float HERO_FREERUN_SPEED_BOOST = 1.20F;
     public static readonly float HERO_JUMP_FORCE = 3.2F;
     public static readonly float HERO_DOUBLEJUMP_FORCE = 3.5F;
     public static readonly int   HERO_BASE_HEALTH = 5;
@@ -123,9 +123,15 @@ public class HeroController : MonoBehaviour
         Debug.DrawRay(transform.position + (new Vector3(-heroGroundDetectExtends, 0, 0)), Vector2.down * distToGround, Color.green);
         Debug.DrawRay(transform.position + (new Vector3( heroGroundDetectExtends, 0, 0)), Vector2.down * distToGround, Color.green);
         if (transform.rotation.y / 10 == 0)
+        {
+            Debug.DrawRay(transform.position + (new Vector3(0, -heroWallDetectHeight * 0.8f, 0)), Vector2.right * distToWall, Color.blue);
             Debug.DrawRay(transform.position + (new Vector3(0, heroWallDetectHeight, 0)), Vector2.right * distToWall, Color.blue);
+        }
         else
+        {
+            Debug.DrawRay(transform.position + (new Vector3(0, -heroWallDetectHeight * 0.8f, 0)), Vector2.left * distToWall, Color.blue);
             Debug.DrawRay(transform.position + (new Vector3(0, heroWallDetectHeight, 0)), Vector2.left * distToWall, Color.blue);
+        }
 
         // Apply Jump Force if pressed & grounded
         if (Input.GetKeyDown(KeyCode.UpArrow))
@@ -268,6 +274,14 @@ public class HeroController : MonoBehaviour
         }
     }
 
+    public void TakeHitPerc(float perc)
+    {
+        if (heroHealth == 1)
+            TakeHit(1);
+        else if (heroHealth > 1)
+            TakeHit((int)Mathf.Round((float)heroHealth * perc));
+    }
+
     // Must be holding down corresponding arrow key to be onwall
     public bool IsOnWall()
     {
@@ -287,10 +301,10 @@ public class HeroController : MonoBehaviour
     {
         if (transform.rotation.y / 10 == 0)
             return (Physics2D.Raycast(transform.position + (new Vector3(0, heroWallDetectHeight, 0)), Vector2.right, distToWall, LayerMask.GetMask("Groundable")) ||
-                    Physics2D.Raycast(transform.position + (new Vector3(0, -heroWallDetectHeight * 0.88f, 0)), Vector2.right, distToWall, LayerMask.GetMask("Groundable")));
+                    Physics2D.Raycast(transform.position + (new Vector3(0, -heroWallDetectHeight * 0.8f, 0)), Vector2.right, distToWall, LayerMask.GetMask("Groundable")));
         else
             return (Physics2D.Raycast(transform.position + (new Vector3(0, heroWallDetectHeight, 0)), Vector2.left, distToWall, LayerMask.GetMask("Groundable")) ||
-                    Physics2D.Raycast(transform.position + (new Vector3(0, -heroWallDetectHeight * 0.88f, 0)), Vector2.left, distToWall, LayerMask.GetMask("Groundable")));
+                    Physics2D.Raycast(transform.position + (new Vector3(0, -heroWallDetectHeight * 0.8f, 0)), Vector2.left, distToWall, LayerMask.GetMask("Groundable")));
     }
 
 public bool IsGrounded()
