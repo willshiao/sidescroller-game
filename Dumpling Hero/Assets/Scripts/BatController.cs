@@ -37,7 +37,7 @@ public class BatController : MonoBehaviour
     // Bat Tweakables
     public static readonly float BAT_BASE_MOVE_SPEED = 0.8F;
     public static readonly int   BAT_BASE_HEALTH_POOL = 10;
-    public static readonly float BAT_DETECT_PROXIMITY = 3.0F;
+    public static readonly float BAT_DETECT_PROXIMITY = 2.2F;
     public static readonly float BAT_ATTACK_PROXIMITY = 0.2F;
     public static readonly float BAT_MELEE_RANGE = 0.15F;
     public static readonly float BAT_STUN_TIME = 0.5F;
@@ -47,8 +47,8 @@ public class BatController : MonoBehaviour
     public static readonly float BAT_ATTACK_MOVE_SPEED = 0.4F;
     public static readonly float BAT_WALL_DETECT_RANGE = 0.25F;
     public static readonly float BAT_CHANGE_DIR_TIME = 0.75F;
-    public static readonly float BAT_RANDOMOVE_CHANCE = 0; // DEBUGGING 0.0006F;
-    public static readonly float BAT_RANDOMOVE_SECONDS = 0.2F;
+    public static readonly float BAT_RANDOMOVE_CHANCE = 0.0006f;
+    public static readonly float BAT_RANDOMOVE_SECONDS = 0.4F;
     public static readonly float BAT_RANDOMOVE_MAX_COOLDOWN_TIME = 10; // in seconds
 
     public static readonly int   BAT_POINTS_PER_KILL = 10;

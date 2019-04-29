@@ -1,12 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class HeroController : MonoBehaviour
 {
     // Hero animator and body collider
     Animator heroAnimator;
     BoxCollider2D heroBodyCollider;
+
+    // Hero health bar, scales from 0 - 1.0
+    Slider healthBar;
 
     // Working trackers and variables
     string lastMoveDir;
@@ -18,22 +22,26 @@ public class HeroController : MonoBehaviour
     float  distToWall;
     bool   wallGrabKeyInputValid;
     int    heroHealth;
+    bool   grounded, onWall;
+    float  raycastCooldownTime;
 
     /* Teakable parameters */
     public static readonly float HERO_BASE_SPEED = 1.88F;
     public static readonly float HERO_ATTACKING_SPEED_PENALTY = 0.41F;
     public static readonly float HERO_SWAPPING_SPEED_PENALTY = 0.5F;
-    public static readonly float HERO_FREERUN_SPEED_BOOST = 1.20F;
+    public static readonly float HERO_FREERUN_SPEED_BOOST = 1.2F;
     public static readonly float HERO_JUMP_FORCE = 3.2F;
     public static readonly float HERO_DOUBLEJUMP_FORCE = 3.5F;
     public static readonly int   HERO_BASE_HEALTH = 5;
 
-    public static readonly float HERO_CLIMB_SPEED = 0.8F;
+    public static readonly float HERO_BASE_CLIMB_SPEED = 0.8F;
+    public static readonly float HERO_CLIMB_FREERUN_SPEED_MOD = 1.5F;
     public static readonly float HERO_MIDAIR_SPEED_PENALTY = 0.67F;
 
     public static readonly float HERO_TAKEHIT_COOLDOWN_TIME = 0.5F;
     public static readonly float HERO_GROUND_DETECT_RAY_LENGTH = 0.065F;
     public static readonly float HERO_WALL_DETECT_RAY_LENGTH = 0.02F;
+    public static readonly float RAYCAST_COOLDOWN_TIME = 0.0046F;
 
     /* 
      * DUMPLING HERO CONTROLS 
@@ -53,14 +61,18 @@ public class HeroController : MonoBehaviour
         doubleJumpUsed = false;
         wallGrabKeyInputValid = true;
         heroHealth = HERO_BASE_HEALTH;
+        raycastCooldownTime = Time.time;
+        grounded = false;
 
         // Get components
         heroAnimator = GetComponent<Animator>();
         heroBodyCollider = GetComponent<BoxCollider2D>();
+        healthBar = GameObject.Find("HealthBar").GetComponent<Slider>();
+        healthBar.value = 1.0f;
 
         // Set ground & wall sensors starting point
-        heroGroundDetectExtends = heroBodyCollider.bounds.extents.x/2.0F;
-        heroWallDetectHeight = heroBodyCollider.bounds.extents.y;
+        heroGroundDetectExtends = heroBodyCollider.bounds.extents.x * 1.0f;
+        heroWallDetectHeight = heroBodyCollider.bounds.extents.y * 0.8f;
 
         // Set ground & wall sensors length
         distToGround = heroBodyCollider.bounds.extents.y + HERO_GROUND_DETECT_RAY_LENGTH;
@@ -74,14 +86,22 @@ public class HeroController : MonoBehaviour
          * It gets updated based on the hero's state */
         float speed = 0;
 
-        // Check if grounded or on-a-wall ONCE for this frame
-        bool grounded = IsGrounded();
-        bool onWall = IsOnWall();
-
+        // Check if grounded or on-a-wall ONCE every interval (not every frame)
+        if (raycastCooldownTime <= Time.time)
+        {
+            grounded = IsGrounded();
+            onWall = IsOnWall();
+            raycastCooldownTime = Time.time + RAYCAST_COOLDOWN_TIME;
+        }
 
         /******************
          * DEATH & DAMAGE *
          * ************** */
+        // If hit cooldown finishes, change Hero hew back to white
+        if (takeHitCooldownTime <= Time.time && gameObject.GetComponent<SpriteRenderer>().color == Color.red)
+        {
+            gameObject.GetComponent<SpriteRenderer>().color = Color.white;
+        }
         // If dead, stay dead
         if (heroHealth <= 0)
         {
@@ -91,11 +111,6 @@ public class HeroController : MonoBehaviour
             }
             return;
         }
-        // If hit cooldown finishes, change Hero hew back to white
-        else if (takeHitCooldownTime <= Time.time && gameObject.GetComponent<SpriteRenderer>().color == Color.red)
-        {
-            gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-        }
 
 
         /******************
@@ -104,10 +119,17 @@ public class HeroController : MonoBehaviour
         // If midair and against a wall, climb!
         if (onWall && !grounded)
         {
+            // Set modifier: go faster if sword is stowed
+            float climbSpeedModifier = HERO_CLIMB_FREERUN_SPEED_MOD;
+            if (heroAnimator.GetBool("swordEquipped"))
+                climbSpeedModifier = 1.0f;
+
             heroAnimator.SetBool("climbing", true);
             heroAnimator.SetBool("midair", false);
+
             gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(gameObject.GetComponent<Rigidbody2D>().velocity.x, 0.0F);
-            transform.Translate(Vector2.up * HERO_CLIMB_SPEED * Time.deltaTime);
+
+            transform.Translate(Vector2.up * HERO_BASE_CLIMB_SPEED * climbSpeedModifier * Time.deltaTime);
             doubleJumpUsed = false;
         }
         else // not climbing
@@ -136,12 +158,12 @@ public class HeroController : MonoBehaviour
         // Debug Rays for wall detection
         if (transform.rotation.y / 10 == 0)
         {
-            Debug.DrawRay(transform.position + (new Vector3(0, -heroWallDetectHeight * 0.8f, 0)), Vector2.right * distToWall, Color.blue);
+            Debug.DrawRay(transform.position + (new Vector3(0, -heroWallDetectHeight, 0)), Vector2.right * distToWall, Color.blue);
             Debug.DrawRay(transform.position + (new Vector3(0, heroWallDetectHeight, 0)), Vector2.right * distToWall, Color.blue);
         }
         else
         {
-            Debug.DrawRay(transform.position + (new Vector3(0, -heroWallDetectHeight * 0.8f, 0)), Vector2.left * distToWall, Color.blue);
+            Debug.DrawRay(transform.position + (new Vector3(0, -heroWallDetectHeight, 0)), Vector2.left * distToWall, Color.blue);
             Debug.DrawRay(transform.position + (new Vector3(0, heroWallDetectHeight, 0)), Vector2.left * distToWall, Color.blue);
         }
 
@@ -159,7 +181,7 @@ public class HeroController : MonoBehaviour
                 gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.up * HERO_JUMP_FORCE, ForceMode2D.Impulse);
 
                 // Set this so you can jump from a wall hold
-                if (onWall && heroAnimator.GetBool("climbing")) 
+                if (onWall && !grounded) 
                     wallGrabKeyInputValid = false;
 
             } 
@@ -238,11 +260,14 @@ public class HeroController : MonoBehaviour
         // Set WEAPON USE animator params based on input
         if (Input.GetKey(KeyCode.Space))
         {
-            if (!heroAnimator.GetBool("swordEquipped"))
+            if (!heroAnimator.GetBool("swordEquipped") && !heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("DoubleJump"))
             {
                 heroAnimator.SetBool("swordEquipped", true);
             }
-            heroAnimator.SetBool("startAttack", true);
+            else if (heroAnimator.GetBool("swordEquipped"))
+            {
+                heroAnimator.SetBool("startAttack", true);
+            }
         }
         else if (Input.GetKeyDown(KeyCode.X))
         {
@@ -298,8 +323,14 @@ public class HeroController : MonoBehaviour
         {
             heroHealth = HERO_BASE_HEALTH;
             Destroy(col.gameObject);
-            print("Got the steak! Current health = " + heroHealth);
+            UpdateHealthBar();
         }
+    }
+
+    // Called when hero is damaged or healed
+    public void UpdateHealthBar()
+    {
+        healthBar.value = ((float)heroHealth / (float)HERO_BASE_HEALTH);
     }
 
     // Called by other objects that can damage the hero
@@ -308,8 +339,8 @@ public class HeroController : MonoBehaviour
         if (takeHitCooldownTime <= Time.time && heroHealth > 0)
         {
             heroHealth -= dmg;
-            print("Hero took " + dmg + " damage! Current Health = " + heroHealth);
             gameObject.GetComponent<SpriteRenderer>().color = Color.red;
+            UpdateHealthBar();
             takeHitCooldownTime = Time.time + HERO_TAKEHIT_COOLDOWN_TIME;
         }
     }
@@ -347,22 +378,26 @@ public class HeroController : MonoBehaviour
         if (transform.rotation.y / 10 == 0)
         {
             return (Physics2D.Raycast(transform.position + (new Vector3(0, heroWallDetectHeight, 0)), Vector2.right, distToWall, LayerMask.GetMask("Groundable")) ||
-                    Physics2D.Raycast(transform.position + (new Vector3(0, -heroWallDetectHeight * 0.8f, 0)), Vector2.right, distToWall, LayerMask.GetMask("Groundable")));
+                    Physics2D.Raycast(transform.position + (new Vector3(0, -heroWallDetectHeight, 0)), Vector2.right, distToWall, LayerMask.GetMask("Groundable")));
         }
         else // facing left (y rotation ~= 180)
         {
             return (Physics2D.Raycast(transform.position + (new Vector3(0, heroWallDetectHeight, 0)), Vector2.left, distToWall, LayerMask.GetMask("Groundable")) ||
-                    Physics2D.Raycast(transform.position + (new Vector3(0, -heroWallDetectHeight * 0.8f, 0)), Vector2.left, distToWall, LayerMask.GetMask("Groundable")));
+                    Physics2D.Raycast(transform.position + (new Vector3(0, -heroWallDetectHeight, 0)), Vector2.left, distToWall, LayerMask.GetMask("Groundable")));
         }
     }
 
     // Called once per frame in update function
     public bool IsGrounded()
     {
-        return Physics2D.Raycast(transform.position + (new Vector3( heroGroundDetectExtends, 0, 0)), -Vector2.up, distToGround, LayerMask.GetMask("Groundable")) ||
-               Physics2D.Raycast(transform.position + (new Vector3(-heroGroundDetectExtends, 0, 0)), -Vector2.up, distToGround, LayerMask.GetMask("Groundable")) ||
-               Physics2D.Raycast(transform.position + (new Vector3( heroGroundDetectExtends, 0, 0)), -Vector2.up, distToGround, LayerMask.GetMask("Movable"))    ||
-               Physics2D.Raycast(transform.position + (new Vector3(-heroGroundDetectExtends, 0, 0)), -Vector2.up, distToGround, LayerMask.GetMask("Movable"));
+        RaycastHit2D rHit1 = Physics2D.Raycast(transform.position + (new Vector3( heroGroundDetectExtends, 0, 0)), -Vector2.up, distToGround, LayerMask.GetMask("Groundable") | LayerMask.GetMask("Movable"));
+        RaycastHit2D rHit2 = Physics2D.Raycast(transform.position + (new Vector3(-heroGroundDetectExtends, 0, 0)), -Vector2.up, distToGround, LayerMask.GetMask("Groundable") | LayerMask.GetMask("Movable"));
+        float colliderEndY = transform.position.y - heroBodyCollider.bounds.extents.y;
+
+        //print("rHit1.point = " + rHit1.point + ", (thr = " + colliderEndY + ")");
+        //print("rHit2.point = " + rHit2.point + ", (thr = " + colliderEndY + ")");
+
+        return (rHit1.collider != null && rHit1.point.y <= colliderEndY) || (rHit2.collider != null && rHit2.point.y <= colliderEndY);
     }
 
 }
