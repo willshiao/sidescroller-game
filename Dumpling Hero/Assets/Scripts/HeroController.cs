@@ -8,11 +8,13 @@ public class HeroController : MonoBehaviour
     // Hero animator and body collider
     Animator heroAnimator;
     BoxCollider2D heroBodyCollider;
+    Rigidbody2D heroBody;
 
     // Hero health bar, scales from 0 - 1.0
     Slider healthBar;
 
     // Working trackers and variables
+    float  heroSpeed;
     string lastMoveDir;
     float  distToGround;
     float  heroGroundDetectExtends;
@@ -21,6 +23,7 @@ public class HeroController : MonoBehaviour
     bool   doubleJumpUsed;
     float  distToWall;
     bool   wallGrabKeyInputValid;
+    float  climbSpeedModifier;
     int    heroHealth;
     bool   grounded, onWall;
     float  raycastCooldownTime;
@@ -34,7 +37,7 @@ public class HeroController : MonoBehaviour
     public static readonly float HERO_DOUBLEJUMP_FORCE = 3.5F;
     public static readonly int   HERO_BASE_HEALTH = 5;
 
-    public static readonly float HERO_BASE_CLIMB_SPEED = 0.8F;
+    public static readonly float HERO_BASE_CLIMB_SPEED = 1.0F;
     public static readonly float HERO_CLIMB_FREERUN_SPEED_MOD = 1.5F;
     public static readonly float HERO_MIDAIR_SPEED_PENALTY = 0.67F;
 
@@ -67,12 +70,13 @@ public class HeroController : MonoBehaviour
         // Get components
         heroAnimator = GetComponent<Animator>();
         heroBodyCollider = GetComponent<BoxCollider2D>();
+        heroBody = GetComponent<Rigidbody2D>();
         healthBar = GameObject.Find("HealthBar").GetComponent<Slider>();
         healthBar.value = 1.0f;
 
         // Set ground & wall sensors starting point
         heroGroundDetectExtends = heroBodyCollider.bounds.extents.x * 1.0f;
-        heroWallDetectHeight = heroBodyCollider.bounds.extents.y * 0.8f;
+        heroWallDetectHeight = heroBodyCollider.bounds.extents.y * 0.9f;
 
         // Set ground & wall sensors length
         distToGround = heroBodyCollider.bounds.extents.y + HERO_GROUND_DETECT_RAY_LENGTH;
@@ -82,10 +86,10 @@ public class HeroController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        /* This is how fast hero moves in the x direction.
-         * It gets updated based on the hero's state */
-        float speed = 0;
 
+        /* ********************
+         * GET PHYSICS PARAMS *
+         * ****************** */
         // Check if grounded or on-a-wall ONCE every interval (not every frame)
         if (raycastCooldownTime <= Time.time)
         {
@@ -120,16 +124,13 @@ public class HeroController : MonoBehaviour
         if (onWall && !grounded)
         {
             // Set modifier: go faster if sword is stowed
-            float climbSpeedModifier = HERO_CLIMB_FREERUN_SPEED_MOD;
+            climbSpeedModifier = HERO_CLIMB_FREERUN_SPEED_MOD;
             if (heroAnimator.GetBool("swordEquipped"))
                 climbSpeedModifier = 1.0f;
 
             heroAnimator.SetBool("climbing", true);
             heroAnimator.SetBool("midair", false);
 
-            gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(gameObject.GetComponent<Rigidbody2D>().velocity.x, 0.0F);
-
-            transform.Translate(Vector2.up * HERO_BASE_CLIMB_SPEED * climbSpeedModifier * Time.deltaTime);
             doubleJumpUsed = false;
         }
         else // not climbing
@@ -158,13 +159,13 @@ public class HeroController : MonoBehaviour
         // Debug Rays for wall detection
         if (transform.rotation.y / 10 == 0)
         {
-            Debug.DrawRay(transform.position + (new Vector3(0, -heroWallDetectHeight, 0)), Vector2.right * distToWall, Color.blue);
-            Debug.DrawRay(transform.position + (new Vector3(0, heroWallDetectHeight, 0)), Vector2.right * distToWall, Color.blue);
+            Debug.DrawRay(transform.position + (new Vector3(0, -heroWallDetectHeight, 0)), new Vector2(1, -0.1f) * distToWall, Color.blue);
+            Debug.DrawRay(transform.position + (new Vector3(0, heroWallDetectHeight, 0)), new Vector2(1, 0) * distToWall, Color.blue);
         }
         else
         {
-            Debug.DrawRay(transform.position + (new Vector3(0, -heroWallDetectHeight, 0)), Vector2.left * distToWall, Color.blue);
-            Debug.DrawRay(transform.position + (new Vector3(0, heroWallDetectHeight, 0)), Vector2.left * distToWall, Color.blue);
+            Debug.DrawRay(transform.position + (new Vector3(0, -heroWallDetectHeight, 0)), new Vector2(-1, -0.1f) * distToWall, Color.blue);
+            Debug.DrawRay(transform.position + (new Vector3(0, heroWallDetectHeight, 0)), new Vector2(-1, 0) * distToWall, Color.blue);
         }
 
 
@@ -175,23 +176,24 @@ public class HeroController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
 
-            if (grounded || onWall) {
-                var rigidbody = gameObject.GetComponent<Rigidbody2D>();
-                rigidbody.velocity = new Vector2(rigidbody.velocity.x, 0.0F);
-                gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.up * HERO_JUMP_FORCE, ForceMode2D.Impulse);
+            heroAnimator.SetBool("climbing", false);
 
-                // Set this so you can jump from a wall hold
-                if (onWall && !grounded) 
-                    wallGrabKeyInputValid = false;
-
+            if (grounded) {
+                heroBody.velocity = new Vector2(heroBody.velocity.x, 0.0F);
+                heroBody.AddForce(Vector2.up * HERO_JUMP_FORCE, ForceMode2D.Impulse);
             } 
+            else if (onWall)
+            {
+                // Set this so you can jump from a wall hold
+                wallGrabKeyInputValid = false;
+                heroBody.AddForce(Vector2.up * HERO_JUMP_FORCE, ForceMode2D.Impulse);
+            }
             else if (!doubleJumpUsed)
             {
-                var rigidbody = gameObject.GetComponent<Rigidbody2D>();
-                rigidbody.velocity = new Vector2(rigidbody.velocity.x, 0.0F);
+                heroBody.velocity = new Vector2(heroBody.velocity.x, 0.0F);
                 doubleJumpUsed = true;
                 heroAnimator.SetTrigger("doubleJump");
-                rigidbody.AddForce(Vector2.up * HERO_DOUBLEJUMP_FORCE, ForceMode2D.Impulse);
+                heroBody.AddForce(Vector2.up * HERO_DOUBLEJUMP_FORCE, ForceMode2D.Impulse);
             }
         }
 
@@ -212,18 +214,16 @@ public class HeroController : MonoBehaviour
             bool flipX = false;
             if (lastMoveDir == "right")
             {
-                speed = -HERO_BASE_SPEED;
+                heroSpeed = -HERO_BASE_SPEED;
                 flipX = true;
             }
             else if (lastMoveDir == "left")
             {
-                speed = HERO_BASE_SPEED;
+                heroSpeed = HERO_BASE_SPEED;
             }
             if (!heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Swapping"))
-            {   
-                gameObject.transform.SetPositionAndRotation(transform.position, new Quaternion(transform.rotation.x, ((flipX) ? 180 : 0), transform.rotation.z, transform.rotation.w));
-                //gameObject.GetComponent<SpriteRenderer>().flipX = flipX;
-
+            {
+                transform.right = new Vector2(((flipX) ? -1 : 1), 0);
             }
         }
         else if (!Input.GetKey("right") && !Input.GetKey("left"))
@@ -234,22 +234,20 @@ public class HeroController : MonoBehaviour
         {
             if (!heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Swapping"))
             {
-                gameObject.transform.SetPositionAndRotation(transform.position, new Quaternion(transform.rotation.x, 0, transform.rotation.z, transform.rotation.w));
-                //gameObject.GetComponent<SpriteRenderer>().flipX = false;
+                transform.right = new Vector2(1, 0);
             }
             heroAnimator.SetBool("moving", true);
-            speed = HERO_BASE_SPEED;
+            heroSpeed = HERO_BASE_SPEED;
             lastMoveDir = "right";
         }
         else if (Input.GetKey("left"))
         {
             if (!heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Swapping"))
             {
-                gameObject.transform.SetPositionAndRotation(transform.position, new Quaternion(transform.rotation.x, 180, transform.rotation.z, transform.rotation.w));
-                //gameObject.GetComponent<SpriteRenderer>().flipX = true;
+                transform.right = new Vector2(-1, 0);
             }
             heroAnimator.SetBool("moving", true);
-            speed = -HERO_BASE_SPEED;
+            heroSpeed = -HERO_BASE_SPEED;
             lastMoveDir = "left";
         }
 
@@ -289,30 +287,46 @@ public class HeroController : MonoBehaviour
         // Adjust speed based on hero's current state and Animator parameters
         if (heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Attack"))
         {
-            speed = speed * HERO_ATTACKING_SPEED_PENALTY; // decrease speed if attacking
+            heroSpeed = heroSpeed * HERO_ATTACKING_SPEED_PENALTY; // decrease speed if attacking
         }
         else if (heroAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Swapping") && IsGrounded())
         {
-            speed = speed * HERO_SWAPPING_SPEED_PENALTY; // decrease speed when drawing weapons
+            heroSpeed = heroSpeed * HERO_SWAPPING_SPEED_PENALTY; // decrease speed when drawing weapons
         }
         else if (!heroAnimator.GetBool("swordEquipped"))
         {
-            speed = speed * HERO_FREERUN_SPEED_BOOST; // increase speed if you do not have your sword out
+            heroSpeed = heroSpeed * HERO_FREERUN_SPEED_BOOST; // increase speed if you do not have your sword out
         }
 
         if (!grounded)
         {
-            speed = speed * HERO_MIDAIR_SPEED_PENALTY;
+            heroSpeed = heroSpeed * HERO_MIDAIR_SPEED_PENALTY;
         }
 
+    }
 
-        /***********************
-         *       TRANSLATE     *
-         * ******************* */
-        // Only move the hero ONCE per frame (right is onward)
-        if (heroAnimator.GetBool("moving"))
+    // Called before all Physics checks!
+    public void FixedUpdate()
+    {
+        // Actually Move the Hero object in here
+        if (heroAnimator.GetBool("climbing"))
         {
-            transform.Translate(transform.right * speed * Time.deltaTime);
+            //heroBody.velocity = new Vector2(heroBody.velocity.x, 0.0F);
+            //transform.Translate(Vector2.up * HERO_BASE_CLIMB_SPEED * climbSpeedModifier * Time.fixedDeltaTime);
+            //heroBody.MovePosition(heroBody.position + (Vector2)transform.up * HERO_BASE_CLIMB_SPEED * climbSpeedModifier * Time.fixedDeltaTime);
+            heroBody.velocity = new Vector2(0.0f, HERO_BASE_CLIMB_SPEED * climbSpeedModifier);
+        }
+        else if (heroAnimator.GetBool("moving"))
+        {
+            //transform.Translate(transform.right * heroSpeed * Time.deltaTime);
+            //heroBody.MovePosition(heroBody.position +  (Vector2)transform.right * Mathf.Abs(heroSpeed) * Time.fixedDeltaTime);
+            heroBody.velocity = new Vector2(heroSpeed, heroBody.velocity.y);
+            
+        } 
+        else if (!heroAnimator.GetBool("moving") && heroBody.velocity.x != 0)
+        {
+            // Glide to stop at a controlled rate
+            heroBody.velocity = new Vector2(heroBody.velocity.x * 0.8f, heroBody.velocity.y);
         }
     }
 
@@ -377,13 +391,13 @@ public class HeroController : MonoBehaviour
         // if facing right ( '/ 10' in case y rotation is close to 0 but not 0)
         if (transform.rotation.y / 10 == 0)
         {
-            return (Physics2D.Raycast(transform.position + (new Vector3(0, heroWallDetectHeight, 0)), Vector2.right, distToWall, LayerMask.GetMask("Groundable")) ||
-                    Physics2D.Raycast(transform.position + (new Vector3(0, -heroWallDetectHeight, 0)), Vector2.right, distToWall, LayerMask.GetMask("Groundable")));
+            return (Physics2D.Raycast(transform.position + (new Vector3(0, heroWallDetectHeight, 0)), new Vector2(1, -0.1f), distToWall, LayerMask.GetMask("Groundable")) ||
+                    Physics2D.Raycast(transform.position + (new Vector3(0, -heroWallDetectHeight, 0)), new Vector2(1, 0), distToWall, LayerMask.GetMask("Groundable")));
         }
         else // facing left (y rotation ~= 180)
         {
-            return (Physics2D.Raycast(transform.position + (new Vector3(0, heroWallDetectHeight, 0)), Vector2.left, distToWall, LayerMask.GetMask("Groundable")) ||
-                    Physics2D.Raycast(transform.position + (new Vector3(0, -heroWallDetectHeight, 0)), Vector2.left, distToWall, LayerMask.GetMask("Groundable")));
+            return (Physics2D.Raycast(transform.position + (new Vector3(0, heroWallDetectHeight, 0)), new Vector2(-1, 0), distToWall, LayerMask.GetMask("Groundable")) ||
+                    Physics2D.Raycast(transform.position + (new Vector3(0, -heroWallDetectHeight, 0)), new Vector2(-1, -0.1f), distToWall, LayerMask.GetMask("Groundable")));
         }
     }
 
