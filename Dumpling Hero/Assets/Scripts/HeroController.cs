@@ -326,7 +326,7 @@ public class HeroController : MonoBehaviour
         else if (!heroAnimator.GetBool("moving") && heroBody.velocity.x != 0)
         {
             // Glide to stop at a controlled rate
-            heroBody.velocity = new Vector2(heroBody.velocity.x * 0.8f, heroBody.velocity.y);
+            heroBody.velocity = new Vector2(heroBody.velocity.x * 0.7f, heroBody.velocity.y);
         }
     }
 

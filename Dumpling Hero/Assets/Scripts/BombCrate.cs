@@ -9,6 +9,7 @@ public class BombCrate : MonoBehaviour
     public static readonly int   BOMBCRATE_ENEMY_DAMAGE = 4;
     public static readonly float BOMBCRATE_PERC_DAMAGE = 0.3f;
     public static readonly float EXPLOSION_RADIUS = 0.55f;
+    public static readonly Color[] RED_COLOR_SHADES = { Color.white, new Color32(251, 17, 0, 255), new Color32(255, 116, 90, 255)};
 
     // Working trackers and variables
     int  bcHealth;
@@ -22,6 +23,7 @@ public class BombCrate : MonoBehaviour
     }
 
     // Update is called once per frame
+    // FixedUpdate() ?? hmmm...
     void Update()
     {
         if (bcHealth <= 0 && !destructionProcessed)
@@ -40,12 +42,15 @@ public class BombCrate : MonoBehaviour
 
     }
 
-    public void TakeHit(int dmg) // You know what that means...
+    public void TakeHit(int dmg)
     {
         if (bcHealth > 0)
         {
-            //bcHealth -= dmg;
             bcHealth--; //just 3 hits to 'splode it
+
+            // Update color shade to be more red after each hit
+            gameObject.GetComponent<SpriteRenderer>().color = RED_COLOR_SHADES[bcHealth];
+
         }
 
     }
