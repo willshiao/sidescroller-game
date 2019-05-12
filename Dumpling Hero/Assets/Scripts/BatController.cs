@@ -9,6 +9,7 @@ public class BatController : MonoBehaviour
     // Animator & body colliders
     Animator batAnimator;
     PolygonCollider2D[] batBodies;
+    Rigidbody2D batBody;
 
     // Combat Text object
     public GameObject CBTprefab;
@@ -19,12 +20,13 @@ public class BatController : MonoBehaviour
     // Score Controller
     ScoreController sc;
 
-    // Player Transform (to track)
+    // Player Position (to track)
     Transform playerTransform;
 
     // Bat's current stats
     int batHealth;
     float batSpeed;
+    float batVertSpeed;
 
     // Working trackers and variables
     int framesToRandoMove;
@@ -32,21 +34,25 @@ public class BatController : MonoBehaviour
     float batAttackCooldownTime;
     float batStunTimer;
     float batChangeDirectionTimer;
+    float batChangeElevationTimer;
     bool  batInAttackProximityFlag;
+    int yHeading;
 
     // Bat Tweakables
     public static readonly float BAT_BASE_MOVE_SPEED = 0.8F;
+    public static readonly float BAT_BASE_VERT_MOVE_SPEED = 0.25f;
     public static readonly int   BAT_BASE_HEALTH_POOL = 10;
     public static readonly float BAT_DETECT_PROXIMITY = 2.2F;
     public static readonly float BAT_ATTACK_PROXIMITY = 0.2F;
     public static readonly float BAT_MELEE_RANGE = 0.15F;
     public static readonly float BAT_STUN_TIME = 0.5F;
     public static readonly float BAT_STUN_MOVE_SPEED = 0.1F;
-    public static readonly float BAT_ATTACK_COOLDOWN_TIME = 1.5F;
+    public static readonly float BAT_ATTACK_COOLDOWN_TIME = 1.0F;
     public static readonly int[] BAT_BASE_DAMAGE = {1, 3};
-    public static readonly float BAT_ATTACK_MOVE_SPEED = 0.4F;
+    public static readonly float BAT_ATTACK_MOVE_SPEED = 0.1F;
     public static readonly float BAT_WALL_DETECT_RANGE = 0.25F;
     public static readonly float BAT_CHANGE_DIR_TIME = 0.75F;
+    public static readonly float BAT_CHANGE_ELEVATION_TIME = 0.3f;
     public static readonly float BAT_RANDOMOVE_CHANCE = 0.0006f;
     public static readonly float BAT_RANDOMOVE_SECONDS = 0.4F;
     public static readonly float BAT_RANDOMOVE_MAX_COOLDOWN_TIME = 10; // in seconds
@@ -60,6 +66,7 @@ public class BatController : MonoBehaviour
 
         batAnimator = GetComponent<Animator>();
         batBodies = GetComponents<PolygonCollider2D>();
+        batBody = GetComponent<Rigidbody2D>();
 
         friendlyLayer = LayerMask.GetMask("Friendly");
 
@@ -67,7 +74,9 @@ public class BatController : MonoBehaviour
         batAttackCooldownTime = Time.time;
         batStunTimer = 0;
         batChangeDirectionTimer = 0;
+        batChangeElevationTimer = 0;
         batInAttackProximityFlag = false;
+        yHeading = 0;
 
         // Get reference to score updater
         if (GameObject.Find("ScoreText") == null)
@@ -86,7 +95,7 @@ public class BatController : MonoBehaviour
         }
         else
         {
-            playerTransform = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
+            playerTransform= GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
         }
     }
 
@@ -113,7 +122,8 @@ public class BatController : MonoBehaviour
         // If Bat is currently stunned and alive
         if (batHealth > 0 && batStunTimer > Time.time)
         {
-            batSpeed = BAT_STUN_MOVE_SPEED * batAnimator.GetInteger("xHeading"); ;
+            batSpeed = BAT_STUN_MOVE_SPEED * batAnimator.GetInteger("xHeading");
+            batVertSpeed = BAT_STUN_MOVE_SPEED * batBody.velocity.y;
             return;
         }
         else if (batHealth <= 0) // Die, if dead
@@ -133,6 +143,9 @@ public class BatController : MonoBehaviour
         // If Bat is in attack animation
         if (batAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Attack"))
         {
+
+            // rapid-gradually slow down during attack
+            batBody.velocity = new Vector2(batBody.velocity.x * 0.2f, batBody.velocity.y * 0.1f);
 
             // wait for the attack to finish
             BatMeleeActive();
@@ -159,18 +172,31 @@ public class BatController : MonoBehaviour
         }
         else if (Time.time >= batRandoMoveCooldownTime && Random.Range(0, 1) < BAT_RANDOMOVE_CHANCE) // Roll chance to go random direction
         {
-            float r = Mathf.Round(Random.Range(0, 3));
+            float rx = Mathf.Round(Random.Range(0, 3));
+            float ry = Mathf.Round(Random.Range(0, 3));
+
             var ri = 1;
-            if (r < 1)
+            if (rx < 1)
             {
                 ri = -1;
             }
-            else if (r < 2)
+            else if (rx < 2)
             {
                 ri = 0;
             }
-            batAnimator.SetInteger("xHeading", ri);
             batSpeed = ri * BAT_BASE_MOVE_SPEED;
+            batAnimator.SetInteger("xHeading", ri);
+
+            ri = 1;
+            if (ry < 1)
+            {
+                ri = -1;
+            }
+            else if (ry < 2)
+            {
+                ri = 0;
+            }
+            batVertSpeed = ri * BAT_BASE_VERT_MOVE_SPEED;
 
             // Start frame counter for hesitate
             framesToRandoMove = (int)(BAT_RANDOMOVE_SECONDS / Time.deltaTime);
@@ -187,27 +213,50 @@ public class BatController : MonoBehaviour
             {
                 batAnimator.SetInteger("xHeading", 0);
             }
-            else if (batChangeDirectionTimer <= Time.time) // else change direction if ready
+            else  // else change direction if ready
             {
-                if (IsLeftOrRightOfMe(playerTransform) == 'L')
-                {
-                    batAnimator.SetInteger("xHeading", -1);
+                if (batChangeDirectionTimer <= Time.time) // Horizontal
+                { 
+                    char leftOrRight = IsLeftOrRightOfMe(playerTransform.position);
+                    if (leftOrRight == 'L')
+                    {
+                        batAnimator.SetInteger("xHeading", -1);
+                    }
+                    else if (leftOrRight == 'R')
+                    {
+                        batAnimator.SetInteger("xHeading", 1);
+                    }
+                    else
+                    {
+                        batAnimator.SetInteger("xHeading", 0);
+                    }
+                    batChangeDirectionTimer = Time.time + BAT_CHANGE_DIR_TIME;
                 }
-                else if (IsLeftOrRightOfMe(playerTransform) == 'R')
+
+                if (batChangeElevationTimer <= Time.time) // Vertical
                 {
-                    batAnimator.SetInteger("xHeading", 1);
+                    char aboveOrBelow = IsAboveOrBelowOfMe(playerTransform.position);
+                    if (aboveOrBelow == 'A')
+                    {
+                        yHeading = 1;
+                    }
+                    else if (aboveOrBelow == 'B')
+                    {
+                        yHeading = -1;
+                    }
+                    else
+                    {
+                        yHeading = 0;
+                    }
+                    batChangeElevationTimer = Time.time + BAT_CHANGE_ELEVATION_TIME;
                 }
-                else
-                {
-                    batAnimator.SetInteger("xHeading", 0);
-                }
-                batChangeDirectionTimer = Time.time + BAT_CHANGE_DIR_TIME;
             }
 
             // Set Bat speed
             batSpeed = batAnimator.GetInteger("xHeading") * BAT_BASE_MOVE_SPEED;
+            batVertSpeed = yHeading * BAT_BASE_VERT_MOVE_SPEED;
 
-            // Turn around if detect a wall and not in attack proximity
+            // If detect a wall and not in attack proximity  OR  if Bat just attacked and Target is in front, go the other way
             if (DetectAWall() && !batInAttackProximityFlag)
             {
                 if (batAnimator.GetInteger("xHeading") != 0)
@@ -216,6 +265,8 @@ public class BatController : MonoBehaviour
                 if (batSpeed != 0)
                     batSpeed = -batSpeed;
             }
+
+            // Detect ceiling and ground....?
 
         }
 
@@ -239,9 +290,12 @@ public class BatController : MonoBehaviour
             batBodies[2].enabled = false;
         }
 
-        // Move the Bat
-        transform.Translate(transform.right * batSpeed * Time.deltaTime);
+    }
 
+    // Called before all Physics checks!
+    public void FixedUpdate()
+    {
+        batBody.velocity = new Vector2(batSpeed, batVertSpeed);
     }
 
     public void TakeHit(int damage)
@@ -316,8 +370,13 @@ public class BatController : MonoBehaviour
     }
     */
 
-    public char IsLeftOrRightOfMe(Transform target)
+    public char IsLeftOrRightOfMe(Vector2 target)
     {
-        return (transform.position.x > target.position.x) ? 'L' : 'R';
+        return (transform.position.x > target.x) ? 'L' : 'R';
+    }
+
+    public char IsAboveOrBelowOfMe(Vector2 target)
+    {
+        return (transform.position.y < target.y) ? 'A' : 'B';
     }
 }
